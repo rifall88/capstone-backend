@@ -1,0 +1,163 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["authentication", "user_management", "analytics"]
+}
+
+enum Role {
+  admin
+  user
+  @@schema("authentication")
+}
+
+enum OtpType {
+  REGISTRATION
+  FORGOT_PASSWORD
+  CHANGE_EMAIL
+  CHANGE_PASSWORD
+  TWO_FACTOR_AUTH
+  
+  @@schema("authentication")
+}
+
+model User {
+  id              String           @id @default(uuid()) @db.Uuid
+  username        String           @unique @db.VarChar(100)
+  email           String           @unique @db.VarChar(100)
+  password        String           @db.VarChar(100)
+  role            Role             @default(user)
+  provider        String           @default("local") @db.VarChar(20)
+  provider_id     String?          @db.VarChar(100)
+  is_verified     Boolean          @default(false)
+  is_active       Boolean          @default(true)
+  created_at      DateTime         @default(now()) @db.Timestamp(0)
+  updated_at      DateTime         @default(now()) @updatedAt @db.Timestamp(0)
+  deleted_at      DateTime?        @db.Timestamp(0)
+
+  profile         ProfileUser?
+  otp_logs        OtpLog[]
+  refresh_tokens  RefreshToken[]
+  password_resets PasswordReset[]
+  login_logs      LoginLog[]
+  face_profiles   FaceProfile[]
+  analytics_logs  FaceAnalyticsLog[]
+
+  @@map("users")
+  @@schema("authentication")
+}
+
+model OtpLog {
+  id            String    @id @default(uuid()) @db.Uuid
+  user_id       String    @db.Uuid
+  otp_code      String    @db.VarChar(10)
+  type          OtpType
+  target        String    @db.VarChar(100)
+  expired_at    DateTime  @db.Timestamp(0)
+  is_used       Boolean   @default(false)
+  attempt_count Int       @default(0)
+  created_at    DateTime  @default(now()) @db.Timestamp(0)
+
+  user          User      @relation(fields: [user_id], references: [id])
+
+  @@map("otp_logs")
+  @@schema("authentication")
+}
+
+model RefreshToken {
+  id           String    @id @default(uuid()) @db.Uuid
+  user_id      String    @db.Uuid
+  token        String    @unique @db.Text
+  ip_address   String?   @db.VarChar(45)
+  user_agent   String?   @db.Text
+  is_revoked   Boolean   @default(false)
+  expired_at   DateTime  @db.Timestamp(0)
+  last_used_at DateTime  @default(now()) @db.Timestamp(0)
+  created_at   DateTime  @default(now()) @db.Timestamp(0)
+
+  user         User      @relation(fields: [user_id], references: [id])
+
+  @@map("refresh_tokens")
+  @@schema("authentication")
+}
+
+model PasswordReset {
+  id         String    @id @default(uuid()) @db.Uuid
+  user_id    String    @db.Uuid
+  token      String    @unique @db.Text
+  is_used    Boolean   @default(false)
+  expired_at DateTime  @db.Timestamp(0)
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+
+  user       User       @relation(fields: [user_id], references: [id])
+
+  @@map("password_resets")
+  @@schema("authentication")
+}
+
+model LoginLog {
+  id             String    @id @default(uuid()) @db.Uuid
+  user_id        String?   @db.Uuid 
+  identifier     String    @db.VarChar(100)
+  ip_address     String?   @db.VarChar(45)
+  user_agent     String?   @db.Text
+  status         String    @db.VarChar(20)
+  failure_reason String?   @db.VarChar(255)
+  location       String?   @db.VarChar(100)
+  created_at     DateTime  @default(now()) @db.Timestamp(0)
+
+  user           User?     @relation(fields: [user_id], references: [id])
+
+  @@map("login_logs")
+  @@schema("authentication")
+}
+
+model ProfileUser {
+  id            String    @id @default(uuid()) @db.Uuid
+  user_id       String    @unique @db.Uuid 
+  full_name     String?   @db.VarChar(255)
+  phone         String?   @db.VarChar(20)
+  birth_date    DateTime? @db.Date
+  gender        String?   @db.VarChar(10)
+  profile_image String?   @db.Text
+  created_at    DateTime  @default(now()) @db.Timestamp(0)
+  updated_at    DateTime  @default(now()) @updatedAt @db.Timestamp(0)
+
+  user          User      @relation(fields: [user_id], references: [id])
+
+  @@map("profile_users")
+  @@schema("user_management")
+}
+
+model FaceProfile {
+  id               String   @id @default(uuid()) @db.Uuid
+  user_id          String   @unique @db.Uuid
+  embedding_vector Json     @db.JsonB 
+  created_at       DateTime @default(now()) @db.Timestamp(0)
+  updated_at       DateTime @default(now()) @updatedAt @db.Timestamp(0)
+
+  user             User     @relation(fields: [user_id], references: [id])
+
+  @@map("face_profiles")
+  @@schema("analytics")
+}
+
+model FaceAnalyticsLog {
+  id               String   @id @default(uuid()) @db.Uuid
+  user_id          String?  @db.Uuid 
+  predicted_age    Int?
+  confidence_score Float?
+  emotion          String?  @db.VarChar(50)
+  is_known_face    Boolean  @default(false)
+  source           String?  @db.VarChar(100)
+  captured_at      DateTime @default(now()) @db.Timestamp(0)
+
+  user             User?    @relation(fields: [user_id], references: [id])
+
+  @@map("face_analytics_logs")
+  @@schema("analytics")
+}
