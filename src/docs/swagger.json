@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://dtwin.projectbase.my.id",
+      "url": "http://192.168.20.31:2051",
       "description": "Development Server"
     }
   ],
@@ -17,6 +17,9 @@
     },
     {
       "name": "Auth"
+    },
+    {
+      "name": "Profiles"
     }
   ],
   "paths": {
@@ -134,6 +137,40 @@
         },
         "responses": {
           "200": { "description": "Delete token success." }
+        }
+      }
+    },
+    "/profiles": {
+      "put": {
+        "tags": ["Profiles"],
+        "summary": "Update profile user",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "full_name": { "type": "string" },
+                  "phone": { "type": "string" },
+                  "birth_date": { "type": "string", "format": "date" },
+                  "gender": { "type": "string", "enum": ["male", "female"] },
+                  "profile_image": { "type": "string", "format": "binary" }
+                },
+                "required": [
+                  "full_name",
+                  "phone",
+                  "birth_date",
+                  "gender",
+                  "profile_image"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Refresh token success." }
         }
       }
     }

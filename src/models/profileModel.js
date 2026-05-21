@@ -11,3 +11,28 @@ export const createProfile = async (data) => {
   );
   return result.rows[0];
 };
+
+export const updateProfile = async (data, userId) => {
+  const fields = [];
+  const values = [];
+  let index = 1;
+
+  for (const key in data) {
+    fields.push(`${key} = $${index}`);
+    values.push(data[key]);
+    index++;
+  }
+
+  fields.push(`updated_at = NOW()`);
+
+  const query = `
+    UPDATE user_management.profile_users
+    SET ${fields.join(", ")}
+    WHERE user_id = $${index}
+    RETURNING *
+  `;
+
+  values.push(userId);
+  const result = await pool.query(query, values);
+  return result.rows[0];
+};

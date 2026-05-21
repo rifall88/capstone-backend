@@ -2,6 +2,9 @@ import {
   findEmailOrUsername,
   createLoginLog,
   createRefreshTokenLog,
+  findValidRefreshToken,
+  updateTokenLastUsed,
+  revokeRefreshToken,
 } from "../models/authModel.js";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
@@ -11,7 +14,11 @@ dotenv.config();
 
 export const login = async (req, res) => {
   const ipAddress =
-    req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    req.headers["cf-connecting-ip"] ||
+    req.headers["x-forwarded-for"] ||
+    req.ip ||
+    req.socket.remoteAddress;
+  const countryCode = req.headers["cf-ipcountry"] || "Unknown";
   const userAgent = req.headers["user-agent"] || "Unknown Device";
   const geo = geoip.lookup(ipAddress);
   const location = geo ? `${geo.city}, ${geo.country}` : "Unknown";
@@ -206,7 +213,7 @@ export const deletetkn = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      message: "Logout sukses, token berhasil dicabut!",
+      message: "Logout success",
     });
   } catch (error) {
     console.error("Logout error:", error);
