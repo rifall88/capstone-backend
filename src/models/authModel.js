@@ -79,3 +79,39 @@ export const revokeRefreshToken = async (token) => {
 
   return result.rows[0];
 };
+
+export const findUserByEmail = async (email) => {
+  const result = await pool.query(
+    "SELECT * FROM authentication.users WHERE email = $1 AND deleted_at IS NULL",
+    [email],
+  );
+  return result.rows[0];
+};
+
+export const createOauthUser = async (data) => {
+  const { id, username, email } = data;
+
+  const result = await pool.query(
+    `INSERT INTO authentication.users 
+    (id, username, email, password, role, is_verified) 
+    VALUES ($1, $2, $3, NULL, 'user', true)
+    RETURNING *`,
+    [id, username, email],
+  );
+
+  return result.rows[0];
+};
+
+export const createOauthProfile = async (data) => {
+  const { id, userId, fullname } = data;
+
+  const result = await pool.query(
+    `INSERT INTO user_management.profile_users 
+    (id, user_id, full_name) 
+    VALUES ($1, $2, $3) 
+    RETURNING *`,
+    [id, userId, fullname],
+  );
+
+  return result.rows[0];
+};

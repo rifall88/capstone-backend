@@ -5,12 +5,19 @@ import {
   findValidRefreshToken,
   updateTokenLastUsed,
   revokeRefreshToken,
+  findUserByEmail,
+  createOauthUser,
+  createOauthProfile,
 } from "../models/authModel.js";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import geoip from "geoip-lite";
 import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
+import { OAuth2Client } from "google-auth-library";
 dotenv.config();
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const login = async (req, res) => {
   const ipAddress =
@@ -135,6 +142,113 @@ export const login = async (req, res) => {
     res
       .status(500)
       .json({ status: "failed", message: "Internal server error" });
+  }
+};
+
+export const googleLogin = async (req, res) => {
+  const ipAddress =
+    req.headers["cf-connecting-ip"] ||
+    req.headers["x-forwarded-for"] ||
+    req.ip ||
+    req.socket.remoteAddress;
+  const countryCode = req.headers["cf-ipcountry"] || "Unknown";
+  const userAgent = req.headers["user-agent"] || "Unknown Device";
+  const geo = geoip.lookup(ipAddress);
+  const location = geo ? `${geo.city}, ${geo.country}` : "Unknown";
+
+  try {
+    const { idToken } = req.body;
+
+    if (!idToken) {
+      return res
+        .status(400)
+        .json({ status: "failed", message: "ID Token is required" });
+    }
+
+    const ticket = await client.verifyIdToken({
+      idToken: idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { email, name } = payload;
+
+    let user = await findUserByEmail(email);
+
+    if (!user) {
+      const userUuid = uuidv4();
+      const generatedUsername =
+        email.split("@")[0] + Math.floor(100 + Math.random() * 900);
+
+      user = await createOauthUser({
+        id: userUuid,
+        username: generatedUsername,
+        email: email,
+      });
+
+      await createOauthProfile({
+        id: uuidv4(),
+        userId: userUuid,
+        fullname: name,
+      });
+    }
+
+    const accessToken = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.ACCESS_TOKEN_KEY,
+      { expiresIn: "3h" },
+    );
+
+    const refreshToken = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.REFRESH_TOKEN_KEY,
+      { expiresIn: "1d" },
+    );
+
+    await createRefreshTokenLog({
+      userId: user.id,
+      token: refreshToken,
+      ipAddress,
+      userAgent,
+    });
+
+    await createLoginLog({
+      userId: user.id,
+      identifier: email,
+      ipAddress,
+      userAgent,
+      status: "SUCCESS",
+      failureReason: "Login via Google OAuth",
+      location,
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Login success",
+      data: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        accessToken,
+        refreshToken,
+      },
+    });
+  } catch (error) {
+    console.error("Google OAuth error: ", error);
+    await createLoginLog({
+      userId: null,
+      identifier: req.body.email || "Unknown OAuth Attempt",
+      ipAddress,
+      userAgent,
+      status: "FAILED",
+      failureReason: "Google Authentication Failed / Invalid Token",
+      location,
+    });
+
+    res
+      .status(401)
+      .json({ status: "failed", message: "Google Authentication Failed" });
   }
 };
 

@@ -73,6 +73,29 @@
         }
       }
     },
+    "/auth/google-login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login user oauth",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "idToken": { "type": "string" }
+                },
+                "required": ["idToken"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login oauth success." }
+        }
+      }
+    },
     "/auth": {
       "post": {
         "tags": ["Auth"],
