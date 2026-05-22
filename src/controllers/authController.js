@@ -184,6 +184,8 @@ export const googleLogin = async (req, res) => {
         id: userUuid,
         username: generatedUsername,
         email: email,
+        provider: "google",
+        provider_id: payload.sub,
       });
 
       await createOauthProfile({

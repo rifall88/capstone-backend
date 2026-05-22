@@ -1,6 +1,6 @@
 import { registerUser, findEmail } from "../models/userModel.js";
 import { createProfile } from "../models/profileModel.js";
-import { findOtp } from "../models/otpModel.js";
+import { findOtp, incrementOtpAttempt } from "../models/otpModel.js";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import { generateOTP } from "../service/otpService.js";
@@ -67,15 +67,39 @@ export const verifyOTP = async (req, res) => {
         .json({ status: "failed", message: "User tidak ditemukan!" });
     }
 
-    const otpEntry = await findOtp({
-      user_id: user.id,
-      otp_code: code,
-    });
+    const otpEntry = await findOtp(user.id);
 
     if (!otpEntry) {
       return res
         .status(400)
         .json({ status: "failed", message: "OTP salah atau sudah expired!" });
+    }
+
+    if (otpEntry.attempt_count >= 10) {
+      return res.status(403).json({
+        status: "failed",
+        message:
+          "Akun terblokir sementara karena salah memasukkan OTP sebanyak 10 kali. Silakan minta OTP baru!",
+      });
+    }
+    if (otpEntry.otp_code !== code) {
+      const updatedLog = await incrementOtpAttempt(
+        otpEntry.id,
+        otpEntry.attempt_count,
+      );
+      const sisaKesempatan = 10 - updatedLog.attempt_count;
+
+      if (sisaKesempatan <= 0) {
+        return res.status(400).json({
+          status: "failed",
+          message: "Kode OTP salah. Kesempatan habis, OTP ini hangus!",
+        });
+      }
+
+      return res.status(400).json({
+        status: "failed",
+        message: `Kode OTP salah! Sisa kesempatan kamu ${sisaKesempatan} kali lagi.`,
+      });
     }
 
     await AuthModel.verifyOtp(otpEntry.id, user.id);

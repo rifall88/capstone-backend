@@ -1,13 +1,13 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Digital Twin API",
+    "title": "Smart Digital Twin API",
     "version": "1.0.0",
-    "description": "Dokumentasi API website Digital Twin."
+    "description": "Dokumentasi API website Smart Digital Twin."
   },
   "servers": [
     {
-      "url": "http://192.168.20.31:2051",
+      "url": "https://dtwin.projectbase.my.id",
       "description": "Development Server"
     }
   ],

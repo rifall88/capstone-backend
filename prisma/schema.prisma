@@ -6,7 +6,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["authentication", "user_management", "analytics"]
+  schemas  = ["authentication", "user_management", "analytics", "telemetry"]
 }
 
 enum Role {
@@ -34,7 +34,7 @@ model User {
   id              String           @id @default(uuid()) @db.Uuid
   username        String           @unique @db.VarChar(100)
   email           String           @unique @db.VarChar(100)
-  password        String?           @db.VarChar(100)
+  password        String?          @db.VarChar(100)
   role            Role             @default(user)
   provider        String           @default("local") @db.VarChar(20)
   provider_id     String?          @db.VarChar(100)
@@ -51,6 +51,8 @@ model User {
   login_logs      LoginLog[]
   face_profiles   FaceProfile[]
   analytics_logs  FaceAnalyticsLog[]
+  user_goals      UserGoal[]
+  daily_logs      DailyLog[]
 
   @@map("users")
   @@schema("authentication")
@@ -66,8 +68,7 @@ model OtpLog {
   is_used       Boolean   @default(false)
   attempt_count Int       @default(0)
   created_at    DateTime  @default(now()) @db.Timestamp(0)
-
-  user          User      @relation(fields: [user_id], references: [id])
+  user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("otp_logs")
   @@schema("authentication")
@@ -83,8 +84,7 @@ model RefreshToken {
   expired_at   DateTime  @db.Timestamp(0)
   last_used_at DateTime  @default(now()) @db.Timestamp(0)
   created_at   DateTime  @default(now()) @db.Timestamp(0)
-
-  user         User      @relation(fields: [user_id], references: [id])
+  user         User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("refresh_tokens")
   @@schema("authentication")
@@ -97,8 +97,7 @@ model PasswordReset {
   is_used    Boolean   @default(false)
   expired_at DateTime  @db.Timestamp(0)
   created_at DateTime  @default(now()) @db.Timestamp(0)
-
-  user       User       @relation(fields: [user_id], references: [id])
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("password_resets")
   @@schema("authentication")
@@ -114,8 +113,7 @@ model LoginLog {
   failure_reason String?   @db.VarChar(255)
   location       String?   @db.VarChar(100)
   created_at     DateTime  @default(now()) @db.Timestamp(0)
-
-  user           User?     @relation(fields: [user_id], references: [id])
+  user           User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("login_logs")
   @@schema("authentication")
@@ -131,8 +129,8 @@ model ProfileUser {
   profile_image String?   @db.Text
   created_at    DateTime  @default(now()) @db.Timestamp(0)
   updated_at    DateTime  @default(now()) @updatedAt @db.Timestamp(0)
-
-  user          User      @relation(fields: [user_id], references: [id])
+  deleted_at    DateTime? @db.Timestamp(0)
+  user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("profile_users")
   @@schema("user_management")
@@ -145,7 +143,7 @@ model FaceProfile {
   created_at       DateTime @default(now()) @db.Timestamp(0)
   updated_at       DateTime @default(now()) @updatedAt @db.Timestamp(0)
 
-  user             User     @relation(fields: [user_id], references: [id])
+  user             User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("face_profiles")
   @@schema("analytics")
@@ -155,14 +153,57 @@ model FaceAnalyticsLog {
   id               String   @id @default(uuid()) @db.Uuid
   user_id          String?  @db.Uuid 
   predicted_age    Int?
-  confidence_score Float?
+  confidence_score Decimal? @db.Decimal(5, 2)
   emotion          String?  @db.VarChar(50)
   is_known_face    Boolean  @default(false)
   source           String?  @db.VarChar(100)
   captured_at      DateTime @default(now()) @db.Timestamp(0)
-
-  user             User?    @relation(fields: [user_id], references: [id])
+  user             User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("face_analytics_logs")
   @@schema("analytics")
+}
+
+model UserGoal {
+  id                 String    @id @default(uuid()) @db.Uuid
+  user_id            String    @unique @db.Uuid
+  focus_sleep        Boolean   @default(false)
+  focus_productivity Boolean   @default(false)
+  focus_fitness      Boolean   @default(false)
+  focus_screen_time  Boolean   @default(false)
+  created_at         DateTime  @default(now()) @db.Timestamp
+  updated_at         DateTime  @default(now()) @updatedAt @db.Timestamp(0)
+  deleted_at         DateTime? @db.Timestamp(0)
+  user               User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_goals")
+  @@schema("user_management")
+}
+
+model DailyLog {
+  log_id                     String    @id @default(uuid()) @db.Uuid
+  user_id                    String    @db.Uuid
+  log_date                   DateTime  @db.Date
+  is_weekend                 Boolean   @default(false)
+  sleep_duration             Decimal?  @db.Decimal(5, 2)
+  sleep_quality              Int?
+  study_work_duration        Decimal?  @db.Decimal(5, 2)
+  break_duration             Decimal?  @db.Decimal(5, 2)
+  physical_activity_duration Decimal?  @db.Decimal(5, 2)
+  screen_time_duration       Decimal?  @db.Decimal(5, 2)
+  stress_level               Int?
+  mood_score                 Int?
+  focus_score                Int?
+  task_completed             Int?
+  task_planned               Int?
+  completion_ratio           Decimal?  @db.Decimal(5, 2)
+  fatigue_accumulation       Decimal?  @db.Decimal(5, 2)
+  productivity_score         Decimal?  @db.Decimal(5, 2)
+  created_at                 DateTime  @default(now()) @db.Timestamp
+  deleted_at                 DateTime? @db.Timestamp
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, log_date])
+  @@map("daily_logs")
+  @@schema("telemetry")
 }

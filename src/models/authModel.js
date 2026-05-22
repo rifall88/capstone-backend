@@ -89,14 +89,14 @@ export const findUserByEmail = async (email) => {
 };
 
 export const createOauthUser = async (data) => {
-  const { id, username, email } = data;
+  const { id, username, email, provider, provider_id } = data;
 
   const result = await pool.query(
     `INSERT INTO authentication.users 
-    (id, username, email, password, role, is_verified) 
-    VALUES ($1, $2, $3, NULL, 'user', true)
+    (id, username, email, password, role, provider, provider_id, is_verified) 
+    VALUES ($1, $2, $3, NULL, 'user', $4, $5, true)
     RETURNING *`,
-    [id, username, email],
+    [id, username, email, provider, provider_id],
   );
 
   return result.rows[0];

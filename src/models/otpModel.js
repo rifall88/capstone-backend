@@ -1,30 +1,42 @@
 import pool from "../databases/dbConfig.js";
 
 export const createOtp = async (data) => {
-  const { user_id, otp_code, type, target, expired_at } = data;
+  const { id, user_id, otp_code, type, target, expired_at } = data;
 
   const result = await pool.query(
     `INSERT INTO authentication.otp_logs
-    (user_id, otp_code, type, target, expired_at)
-    VALUES ($1, $2, $3, $4, $5)
+    (id, user_id, otp_code, type, target, expired_at)
+    VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING *`,
-    [user_id, otp_code, type, target, expired_at],
+    [id, user_id, otp_code, type, target, expired_at],
   );
 
   return result.rows[0];
 };
 
-export const findOtp = async (data) => {
-  const { user_id, otp_code } = data;
-
+export const findOtp = async (userId) => {
   const result = await pool.query(
     `SELECT * FROM authentication.otp_logs
      WHERE user_id = $1
-     AND otp_code = $2
      AND is_used = false
      AND expired_at > NOW()
+     ORDER BY created_at DESC
      LIMIT 1`,
-    [user_id, otp_code],
+    [userId],
+  );
+
+  return result.rows[0];
+};
+
+export const incrementOtpAttempt = async (id, currentAttempt) => {
+  const newAttempt = currentAttempt + 1;
+
+  const result = await pool.query(
+    `UPDATE authentication.otp_logs 
+     SET attempt_count = $1 
+     WHERE id = $2
+     RETURNING *`,
+    [newAttempt, id],
   );
 
   return result.rows[0];
