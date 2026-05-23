@@ -1,0 +1,32 @@
+{
+  "name": "capstone-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon src/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "axios": "^1.16.1",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "geoip-lite": "^1.4.10",
+    "google-auth-library": "^10.6.2",
+    "joi": "^18.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "nodemailer": "^8.0.7",
+    "nodemon": "^3.1.14",
+    "pg": "^8.20.0",
+    "prisma": "^6.19.3",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^14.0.0"
+  }
+}
