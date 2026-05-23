@@ -1,4 +1,5 @@
-import { updateProfile } from "../models/profileModel.js";
+import { gender } from "@prisma/client";
+import { updateProfile, findUserProfile } from "../models/profileModel.js";
 
 export const putProfile = async (req, res) => {
   const { full_name, phone, birth_date, gender } = req.body;
@@ -44,9 +45,41 @@ export const putProfile = async (req, res) => {
       data: updatedProfile,
     });
   } catch (error) {
-    console.error("Updating profile error:", error);
-    console.error(error.message);
+    console.error("Updating profile error:", error.message);
     return res.status(500).json({
+      status: "failed",
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getUserProfile = async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const user = await findUserProfile(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: "failed",
+        message: "User not found",
+      });
+    }
+    res.status(200).json({
+      status: "success",
+      data: {
+        id: user.id,
+        fullname: user.full_name,
+        username: user.username,
+        email: user.email,
+        phone: user.phone,
+        birthdate: user.birth_date,
+        gender: user.gender,
+        profileimage: user.profile_image,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("Getting user error: ", error.message);
+    res.status(500).json({
       status: "failed",
       message: "Internal server error",
     });

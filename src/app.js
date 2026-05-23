@@ -5,6 +5,7 @@ import swaggerDocument from "./docs/swagger.json" with { type: "json" };
 import userRoute from "./routes/userRoute.js";
 import authRoute from "./routes/authRoute.js";
 import profileRoute from "./routes/profileRoute.js";
+import faceDetectionRoute from "./routes/faceDetectionRoute.js";
 
 dotenv.config();
 
@@ -12,12 +13,13 @@ const app = express();
 app.set("trust proxy", true);
 const port = process.env.PORT;
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 app.use("/auth", authRoute);
 app.use("/users", userRoute);
 app.use("/profiles", profileRoute);
+app.use("/analytics", faceDetectionRoute);
 
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 

@@ -1,6 +1,9 @@
 import express from "express";
 import multer from "multer";
-import { putProfile } from "../controllers/profileController.js";
+import {
+  putProfile,
+  getUserProfile,
+} from "../controllers/profileController.js";
 import { authenticate } from "../middlewares/authMiddleware.js";
 
 const storage = multer.diskStorage({
@@ -12,5 +15,6 @@ const upload = multer({ storage });
 const router = express.Router();
 
 router.put("/", upload.single("profile_image"), authenticate, putProfile);
+router.get("/", authenticate, getUserProfile);
 
 export default router;

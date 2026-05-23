@@ -36,3 +36,16 @@ export const updateProfile = async (data, userId) => {
   const result = await pool.query(query, values);
   return result.rows[0];
 };
+
+export const findUserProfile = async (userId) => {
+  const result = await pool.query(
+    `SELECT p.id, p.full_name, u.username, u.email, p.phone,
+    p.birth_date, p.gender, p.profile_image, u.role
+    FROM user_management.profile_users p 
+    INNER JOIN authentication.users u ON p.user_id = u.id
+    WHERE p.user_id = $1 `,
+    [userId],
+  );
+
+  return result.rows[0];
+};

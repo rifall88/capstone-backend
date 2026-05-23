@@ -20,6 +20,9 @@
     },
     {
       "name": "Profiles"
+    },
+    {
+      "name": "Analytics"
     }
   ],
   "paths": {
@@ -194,6 +197,62 @@
         },
         "responses": {
           "200": { "description": "Refresh token success." }
+        }
+      },
+      "get": {
+        "tags": ["Profiles"],
+        "summary": "Get user profile",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Ok." }
+        }
+      }
+    },
+    "/analytics/face-detection": {
+      "post": {
+        "tags": ["Analytics"],
+        "summary": "Mendeteksi emosi",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image_base64": { "type": "string" }
+                },
+                "required": ["image_base64"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Ok." }
+        }
+      }
+    },
+    "/analytics/apply-profile": {
+      "post": {
+        "tags": ["Analytics"],
+        "summary": "Mendeteksi usisa & gender",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image_base64": { "type": "string" }
+                },
+                "required": ["image_base64"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Ok." }
         }
       }
     }
