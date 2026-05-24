@@ -31,7 +31,7 @@ export const register = async (req, res) => {
 
     res.status(201).json({
       status: "success",
-      message: "Register Success. Silakan cek OTP untuk verifikasi.",
+      message: "Register Success. Please check OTP for verification",
       data: {
         id: user.id,
         fullname,
@@ -44,7 +44,7 @@ export const register = async (req, res) => {
     if (error.code === "23505") {
       return res.status(400).json({
         status: "failed",
-        message: "Email atau Username sudah terdaftar",
+        message: "Email or Username is already registered.",
       });
     }
     console.error("Register error", error);
@@ -64,7 +64,7 @@ export const verifyOTP = async (req, res) => {
     if (!user) {
       return res
         .status(404)
-        .json({ status: "failed", message: "User tidak ditemukan!" });
+        .json({ status: "failed", message: "User not found" });
     }
 
     const otpEntry = await findOtp(user.id);
@@ -72,14 +72,14 @@ export const verifyOTP = async (req, res) => {
     if (!otpEntry) {
       return res
         .status(400)
-        .json({ status: "failed", message: "OTP salah atau sudah expired!" });
+        .json({ status: "failed", message: "OTP is incorrect or has expired" });
     }
 
     if (otpEntry.attempt_count >= 10) {
       return res.status(403).json({
         status: "failed",
         message:
-          "Akun terblokir sementara karena salah memasukkan OTP sebanyak 10 kali. Silakan minta OTP baru!",
+          "Your account is temporarily blocked due to 10 incorrect OTP entries. Please request a new OTP",
       });
     }
     if (otpEntry.otp_code !== code) {
@@ -92,13 +92,14 @@ export const verifyOTP = async (req, res) => {
       if (sisaKesempatan <= 0) {
         return res.status(400).json({
           status: "failed",
-          message: "Kode OTP salah. Kesempatan habis, OTP ini hangus!",
+          message:
+            "The OTP code is incorrect. The opportunity is over, this OTP is invalid",
         });
       }
 
       return res.status(400).json({
         status: "failed",
-        message: `Kode OTP salah! Sisa kesempatan kamu ${sisaKesempatan} kali lagi.`,
+        message: `Wrong OTP code! Your remaining chance is ${sisaKesempatan} one more time`,
       });
     }
 
@@ -106,7 +107,7 @@ export const verifyOTP = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: "success", message: "Verifikasi berhasil!" });
+      .json({ status: "success", message: "OTP verification successful" });
   } catch (error) {
     console.error("Verify error", error);
     res.status(500).json({

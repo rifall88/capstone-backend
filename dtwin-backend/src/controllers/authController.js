@@ -41,11 +41,11 @@ export const login = async (req, res) => {
         identifier,
         ipAddress,
         userAgent,
-        status: "FAILED",
-        failureReason: "Email tidak terdaftar",
+        status: "failed",
+        failureReason: "Email not registered",
         location,
       });
-      return res.status(401).json({ status: "failed", message: "Email salah" });
+      return res.status(401).json({ status: "failed", message: "Wrong email" });
     }
 
     if (!user.password) {
@@ -54,13 +54,13 @@ export const login = async (req, res) => {
         identifier,
         ipAddress,
         userAgent,
-        status: "FAILED",
+        status: "failed",
         failureReason: "User login via Google/OAuth",
         location,
       });
       return res
         .status(500)
-        .json({ status: "failed", message: "User tidak memiliki password" });
+        .json({ status: "failed", message: "User does not have a password" });
     }
 
     if (!user.is_verified) {
@@ -69,14 +69,14 @@ export const login = async (req, res) => {
         identifier,
         ipAddress,
         userAgent,
-        status: "FAILED",
-        failureReason: "Akun belum verifikasi OTP",
+        status: "failed",
+        failureReason: "Account has not been OTP verified",
         location,
       });
       return res.status(403).json({
         status: "failed",
         message:
-          "Akun kamu belum diverifikasi, Silakan verifikasi OTP terlebih dahulu.",
+          "Your account has not been verified, please verify the OTP first",
         needVerification: true,
       });
     }
@@ -88,13 +88,13 @@ export const login = async (req, res) => {
         identifier,
         ipAddress,
         userAgent,
-        status: "FAILED",
-        failureReason: "Password salah",
+        status: "failed",
+        failureReason: "Wrong password",
         location,
       });
       return res
         .status(401)
-        .json({ status: "failed", message: "Password salah" });
+        .json({ status: "failed", message: "Wrong password" });
     }
 
     const accessToken = jwt.sign(
@@ -120,7 +120,7 @@ export const login = async (req, res) => {
       identifier,
       ipAddress,
       userAgent,
-      status: "SUCCESS",
+      status: "success",
       failureReason: null,
       location,
     });
@@ -162,7 +162,7 @@ export const googleLogin = async (req, res) => {
     if (!idToken) {
       return res
         .status(400)
-        .json({ status: "failed", message: "ID Token is required" });
+        .json({ status: "failed", message: "ID token is required" });
     }
 
     const ticket = await client.verifyIdToken({
@@ -219,7 +219,7 @@ export const googleLogin = async (req, res) => {
       identifier: email,
       ipAddress,
       userAgent,
-      status: "SUCCESS",
+      status: "success",
       failureReason: "Login via Google OAuth",
       location,
     });
@@ -243,14 +243,14 @@ export const googleLogin = async (req, res) => {
       identifier: req.body.email || "Unknown OAuth Attempt",
       ipAddress,
       userAgent,
-      status: "FAILED",
-      failureReason: "Google Authentication Failed / Invalid Token",
+      status: "failed",
+      failureReason: "Google authentication failed",
       location,
     });
 
     res
       .status(401)
-      .json({ status: "failed", message: "Google Authentication Failed" });
+      .json({ status: "failed", message: "Google authentication failed" });
   }
 };
 
@@ -268,8 +268,7 @@ export const refresh = async (req, res) => {
     if (!tokenData) {
       return res.status(401).json({
         status: "failed",
-        message:
-          "Refresh token tidak valid, sudah expired, atau telah dicabut!",
+        message: "Invalid refresh token",
       });
     }
 
@@ -323,7 +322,7 @@ export const deletetkn = async (req, res) => {
     if (!hpsToken) {
       return res.status(400).json({
         status: "failed",
-        message: "Token tidak ditemukan atau sudah tidak valid",
+        message: "Token not found or is no longer valid",
       });
     }
 

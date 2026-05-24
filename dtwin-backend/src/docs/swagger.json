@@ -19,6 +19,9 @@
       "name": "Auth"
     },
     {
+      "name": "Forgot Password"
+    },
+    {
       "name": "Profiles"
     },
     {
@@ -55,7 +58,7 @@
     "/users/verify-otp": {
       "post": {
         "tags": ["Users"],
-        "summary": "Verify Otp",
+        "summary": "Verify OTP",
         "requestBody": {
           "required": true,
           "content": {
@@ -72,7 +75,7 @@
           }
         },
         "responses": {
-          "200": { "description": "Login success." }
+          "200": { "description": "OTP verification successful." }
         }
       }
     },
@@ -124,7 +127,7 @@
       },
       "put": {
         "tags": ["Auth"],
-        "summary": "Refresh Token",
+        "summary": "Refresh token",
         "requestBody": {
           "required": true,
           "content": {
@@ -145,7 +148,7 @@
       },
       "delete": {
         "tags": ["Auth"],
-        "summary": "Delete Refresh Token",
+        "summary": "Delete refresh token",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
@@ -166,10 +169,83 @@
         }
       }
     },
+    "/forgot-password": {
+      "post": {
+        "tags": ["Forgot Password"],
+        "summary": "Forgot password",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP code for password reset has been sent to your email."
+          }
+        }
+      }
+    },
+    "/forgot-password/verify": {
+      "post": {
+        "tags": ["Forgot Password"],
+        "summary": "Verify OTP",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "code": { "type": "string" }
+                },
+                "required": ["email", "code"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "OTP verification successful." }
+        }
+      }
+    },
+    "/forgot-password/reset": {
+      "post": {
+        "tags": ["Forgot Password"],
+        "summary": "Reset password",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": { "type": "string" },
+                  "newPassword": { "type": "string" }
+                },
+                "required": ["token", "newPassword"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Password successfully updated." }
+        }
+      }
+    },
     "/profiles": {
       "put": {
         "tags": ["Profiles"],
-        "summary": "Update profile user",
+        "summary": "Update user profile ",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
@@ -211,31 +287,7 @@
     "/analytics/face-detection": {
       "post": {
         "tags": ["Analytics"],
-        "summary": "Mendeteksi emosi",
-        "security": [{ "bearerAuth": [] }],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "image_base64": { "type": "string" }
-                },
-                "required": ["image_base64"]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": { "description": "Ok." }
-        }
-      }
-    },
-    "/analytics/apply-profile": {
-      "post": {
-        "tags": ["Analytics"],
-        "summary": "Mendeteksi usisa & gender",
+        "summary": "Daily check-in",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,

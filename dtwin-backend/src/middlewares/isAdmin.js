@@ -4,5 +4,5 @@ export const isAdmin = (req, res, next) => {
   }
   return res
     .status(403)
-    .json({ status: "failed", message: "Admin Only Access" });
+    .json({ status: "failed", message: "Admin only access" });
 };

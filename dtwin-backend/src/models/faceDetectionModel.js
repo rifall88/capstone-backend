@@ -29,17 +29,3 @@ export const createFaceAnalyticsLog = async (data) => {
 
   return result.rows[0];
 };
-
-export const updateUserProfileViaAI = async (userId, birthDate, gender) => {
-  const result = await pool.query(
-    `UPDATE user_management.profile_users 
-     SET birth_date = $1, 
-         gender = $2::user_management.gender, 
-         updated_at = NOW()
-     WHERE user_id = $3
-     RETURNING *`,
-    [birthDate, gender, userId],
-  );
-
-  return result.rows[0];
-};

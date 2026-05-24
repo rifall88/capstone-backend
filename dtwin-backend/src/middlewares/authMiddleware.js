@@ -10,7 +10,7 @@ export const authenticate = async (req, res, next) => {
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         status: "failed",
-        message: "Token tidak ditemukan atau format salah",
+        message: "Token not found or incorrect format",
       });
     }
     const token = authHeader.split(" ")[1];
@@ -23,13 +23,13 @@ export const authenticate = async (req, res, next) => {
     if (error.name === "JsonWebTokenError") {
       return res
         .status(401)
-        .json({ status: "failed", message: "Token tidak valid" });
+        .json({ status: "failed", message: "Invalid token" });
     }
 
     if (error.name === "TokenExpiredError") {
       return res
         .status(401)
-        .json({ status: "failed", message: "Token telah kadaluarsa" });
+        .json({ status: "failed", message: "Token has expired" });
     }
 
     return res.status(500).json({
