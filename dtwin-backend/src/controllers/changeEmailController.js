@@ -2,7 +2,6 @@ import { changeEmail, findOtp } from "../models/changeEmailModel.js";
 import { incrementOtpAttempt } from "../models/otpModel.js";
 import { generateOTP } from "../service/otpService.js";
 import { sendOtpEmail } from "../service/emailService.js";
-import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import AuthModel from "../models/prismaModel.js";
 
@@ -16,7 +15,7 @@ export const updateEmail = async (req, res) => {
 
     return res.status(200).json({
       status: "success",
-      message: "OTP code for password reset has been sent to your email",
+      message: "OTP code for change email has been sent to your email",
       data: { email },
     });
   } catch (error) {

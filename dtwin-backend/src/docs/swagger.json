@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "http://192.168.20.31:2051",
+      "url": "https://dtwin.projectbase.my.id",
       "description": "Development Server"
     }
   ],
@@ -23,6 +23,9 @@
     },
     {
       "name": "Change Email"
+    },
+    {
+      "name": "Change Password"
     },
     {
       "name": "Profiles"
@@ -267,6 +270,33 @@
         "responses": {
           "200": {
             "description": "OTP code for change email has been sent to your new email."
+          }
+        }
+      }
+    },
+    "/change-password": {
+      "put": {
+        "tags": ["Change Password"],
+        "summary": "Change password",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "oldPassword": { "type": "string" },
+                  "newPassword": { "type": "string" }
+                },
+                "required": ["oldPassword", "newPassword"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password successfully changed."
           }
         }
       }
