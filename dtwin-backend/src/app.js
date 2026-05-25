@@ -7,6 +7,7 @@ import authRoute from "./routes/authRoute.js";
 import profileRoute from "./routes/profileRoute.js";
 import faceDetectionRoute from "./routes/faceDetectionRoute.js";
 import passwordResetRoute from "./routes/passwordResetRoute.js";
+import changeEmailRoute from "./routes/changeEmailRoute.js";
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use("/users", userRoute);
 app.use("/profiles", profileRoute);
 app.use("/analytics", faceDetectionRoute);
 app.use("/forgot-password", passwordResetRoute);
+app.use("/change-email", changeEmailRoute);
 
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 

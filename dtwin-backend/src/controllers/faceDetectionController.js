@@ -1,4 +1,5 @@
 import { createFaceAnalyticsLog } from "../models/faceDetectionModel.js";
+import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
 import axios from "axios";
 dotenv.config();
@@ -27,6 +28,7 @@ export const scanAndRecordFace = async (req, res) => {
     const aiResult = pythonResponse.data.data;
 
     const savedLog = await createFaceAnalyticsLog({
+      id: uuidv4(),
       user_id: userId,
       predicted_age: aiResult.predicted_age,
       confidence_score: aiResult.confidence_score,

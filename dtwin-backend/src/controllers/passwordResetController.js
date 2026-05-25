@@ -22,7 +22,7 @@ export const forgotPassword = async (req, res) => {
         .json({ status: "failed", message: "Email is not registered" });
     }
 
-    const otpData = await generateOTP(user.id, user.email, "FORGOT_PASSWORD");
+    const otpData = await generateOTP(user.id, user.email, "forgot_password");
     await sendOtpEmail(user.email, otpData.otp_code);
 
     return res.status(200).json({
@@ -74,12 +74,13 @@ export const verifyForgotPasswordOTP = async (req, res) => {
       if (sisaKesempatan <= 0) {
         return res.status(400).json({
           status: "failed",
-          message: "The OTP code is incorrect. OTP is invalid",
+          message:
+            "The OTP code is incorrect. The opportunity is over, this OTP is invalid",
         });
       }
       return res.status(400).json({
         status: "failed",
-        message: `Wrong OTP code! Remaining chance: ${sisaKesempatan}`,
+        message: `Wrong OTP code! Your remaining chance is ${sisaKesempatan} one more time`,
       });
     }
 

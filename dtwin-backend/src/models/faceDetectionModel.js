@@ -2,6 +2,7 @@ import pool from "../databases/dbConfig.js";
 
 export const createFaceAnalyticsLog = async (data) => {
   const {
+    id,
     user_id,
     predicted_age,
     confidence_score,
@@ -14,9 +15,10 @@ export const createFaceAnalyticsLog = async (data) => {
   const result = await pool.query(
     `INSERT INTO analytics.face_analytics_logs 
     (id, user_id, predicted_age, confidence_score, emotion, gender, is_known_face, source) 
-    VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING *`,
     [
+      id,
       user_id,
       predicted_age,
       confidence_score,

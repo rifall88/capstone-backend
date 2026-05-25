@@ -16,11 +16,10 @@ enum Role {
 }
 
 enum OtpType {
-  REGISTRATION
-  FORGOT_PASSWORD
-  CHANGE_EMAIL
-  CHANGE_PASSWORD
-  TWO_FACTOR_AUTH
+  registration
+  forgot_password
+  change_email
+  change_password
   @@schema("authentication")
 }
 

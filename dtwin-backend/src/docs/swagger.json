@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://dtwin.projectbase.my.id",
+      "url": "http://192.168.20.31:2051",
       "description": "Development Server"
     }
   ],
@@ -20,6 +20,9 @@
     },
     {
       "name": "Forgot Password"
+    },
+    {
+      "name": "Change Email"
     },
     {
       "name": "Profiles"
@@ -194,7 +197,7 @@
         }
       }
     },
-    "/forgot-password/verify": {
+    "/forgot-password/verify-otp": {
       "post": {
         "tags": ["Forgot Password"],
         "summary": "Verify OTP",
@@ -218,7 +221,7 @@
         }
       }
     },
-    "/forgot-password/reset": {
+    "/forgot-password/reset-password": {
       "post": {
         "tags": ["Forgot Password"],
         "summary": "Reset password",
@@ -239,6 +242,58 @@
         },
         "responses": {
           "200": { "description": "Password successfully updated." }
+        }
+      }
+    },
+    "/change-email": {
+      "post": {
+        "tags": ["Change Email"],
+        "summary": "Change email",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP code for change email has been sent to your new email."
+          }
+        }
+      }
+    },
+    "/change-email/verify-otp": {
+      "post": {
+        "tags": ["Change Email"],
+        "summary": "Verify OTP",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": { "type": "string" }
+                },
+                "required": ["code"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP code for change email has been sent to your new email."
+          }
         }
       }
     },

@@ -1,73 +1,44 @@
-import { registerUser, findEmail } from "../models/userModel.js";
-import { createProfile } from "../models/profileModel.js";
-import { findOtp, incrementOtpAttempt } from "../models/otpModel.js";
-import bcrypt from "bcrypt";
-import { v4 as uuidv4 } from "uuid";
+import { changeEmail, findOtp } from "../models/changeEmailModel.js";
+import { incrementOtpAttempt } from "../models/otpModel.js";
 import { generateOTP } from "../service/otpService.js";
 import { sendOtpEmail } from "../service/emailService.js";
+import bcrypt from "bcrypt";
+import { v4 as uuidv4 } from "uuid";
 import AuthModel from "../models/prismaModel.js";
 
-export const register = async (req, res) => {
+export const updateEmail = async (req, res) => {
   try {
-    const { fullname, username, email, password, role } = req.body;
-    const hash = await bcrypt.hash(password, 10);
-    const stringUuid = uuidv4();
-    const user = await registerUser({
-      id: stringUuid,
-      username,
-      email,
-      password: hash,
-      role: "user",
-    });
+    const { email } = req.body;
+    const userId = req.user.id;
 
-    const profile = await createProfile({
-      id: uuidv4(),
-      user_id: user.id,
-      fullname,
-    });
+    const otpData = await generateOTP(userId, email, "change_email");
+    await sendOtpEmail(email, otpData.otp_code);
 
-    const otpData = await generateOTP(user.id, user.email, "registration");
-    await sendOtpEmail(user.email, otpData.otp_code);
-
-    res.status(201).json({
+    return res.status(200).json({
       status: "success",
-      message: "Register Success. Please check OTP for verification",
-      data: {
-        id: user.id,
-        fullname,
-        username,
-        email,
-        role,
-      },
+      message: "OTP code for password reset has been sent to your email",
+      data: { email },
     });
   } catch (error) {
     if (error.code === "23505") {
       return res.status(400).json({
         status: "failed",
-        message: "Email or Username is already registered.",
+        message: "Email is already registered.",
       });
     }
-    console.error("Register error", error);
-    res.status(500).json({
-      status: "failed",
-      message: "Internal server error",
-    });
+    console.error("Change email error", error);
+    return res
+      .status(500)
+      .json({ status: "failed", message: "Internal server error" });
   }
 };
 
 export const verifyOTP = async (req, res) => {
-  const { email, code } = req.body;
+  const { code } = req.body;
+  const userId = req.user.id;
 
   try {
-    const user = await findEmail(email);
-
-    if (!user) {
-      return res
-        .status(404)
-        .json({ status: "failed", message: "User not found" });
-    }
-
-    const otpEntry = await findOtp(user.id);
+    const otpEntry = await findOtp(userId);
 
     if (!otpEntry) {
       return res
@@ -103,7 +74,9 @@ export const verifyOTP = async (req, res) => {
       });
     }
 
-    await AuthModel.verifyOtp(otpEntry.id, user.id);
+    await changeEmail(userId, otpEntry.target);
+
+    await AuthModel.verifyOtp(otpEntry.id, userId);
 
     return res
       .status(200)
