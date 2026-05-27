@@ -25,33 +25,3 @@ export const findResetToken = async (token) => {
 
   return result.rows[0];
 };
-
-export const executePasswordReset = async (userId, tokenId, hashedPassword) => {
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-
-    await client.query(
-      `UPDATE authentication.users
-       SET password = $1
-       WHERE id = $2`,
-      [hashedPassword, userId],
-    );
-
-    const result = await client.query(
-      `UPDATE authentication.password_resets
-       SET is_used = true
-       WHERE id = $1
-       RETURNING *`,
-      [tokenId],
-    );
-
-    await client.query("COMMIT");
-    return result.rows[0];
-  } catch (error) {
-    await client.query("ROLLBACK");
-    throw error;
-  } finally {
-    client.release();
-  }
-};
