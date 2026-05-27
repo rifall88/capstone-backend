@@ -1,9 +1,12 @@
-import { changeEmail, findOtp } from "../models/changeEmailModel.js";
-import { incrementOtpAttempt } from "../models/otpModel.js";
+import {
+  findOtpByUserId,
+  verifyOtp,
+  incrementOtpAttempt,
+} from "../models/otpModel.js";
+import { changeEmail } from "../models/userModel.js";
 import { generateOTP } from "../service/otpService.js";
 import { sendOtpEmail } from "../service/emailService.js";
 import { v4 as uuidv4 } from "uuid";
-import AuthModel from "../models/prismaModel.js";
 
 export const updateEmail = async (req, res) => {
   try {
@@ -37,7 +40,7 @@ export const verifyOTP = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const otpEntry = await findOtp(userId);
+    const otpEntry = await findOtpByUserId(userId);
 
     if (!otpEntry) {
       return res
@@ -75,11 +78,11 @@ export const verifyOTP = async (req, res) => {
 
     await changeEmail(userId, otpEntry.target);
 
-    await AuthModel.verifyOtp(otpEntry.id, userId);
+    await verifyOtp(otpEntry.id, userId);
 
     return res
       .status(200)
-      .json({ status: "success", message: "OTP verification successful" });
+      .json({ status: "success", message: "Change email successful" });
   } catch (error) {
     console.error("Verify error", error);
     res.status(500).json({

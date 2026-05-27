@@ -1,5 +1,4 @@
 import pool from "../databases/dbConfig.js";
-import AuthModel from "./prismaModel.js";
 
 export const createRefreshTokenLog = async (data) => {
   const { userId, token, ipAddress, userAgent } = data;
@@ -14,8 +13,6 @@ export const createRefreshTokenLog = async (data) => {
 
   return result.rows[0];
 };
-
-
 
 export const findValidRefreshToken = async (token) => {
   const result = await pool.query(

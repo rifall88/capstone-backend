@@ -1,14 +1,16 @@
 import {
-  findEmailOrUsername,
-  createLoginLog,
   createRefreshTokenLog,
   findValidRefreshToken,
   updateTokenLastUsed,
   revokeRefreshToken,
+} from "../models/refreshTokenModel.js";
+import {
+  findEmailOrUsername,
   findUserByEmail,
   createOauthUser,
-  createOauthProfile,
-} from "../models/authModel.js";
+} from "../models/userModel.js";
+import { createLoginLog } from "../models/loginLogModel.js";
+import { createOauthProfile } from "../models/profileModel.js";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import geoip from "geoip-lite";
@@ -42,10 +44,12 @@ export const login = async (req, res) => {
         ipAddress,
         userAgent,
         status: "failed",
-        failureReason: "Email not registered",
+        failureReason: "Email or Username not registered",
         location,
       });
-      return res.status(401).json({ status: "failed", message: "Wrong email" });
+      return res
+        .status(401)
+        .json({ status: "failed", message: "Wrong email or username" });
     }
 
     if (!user.password) {
@@ -55,7 +59,7 @@ export const login = async (req, res) => {
         ipAddress,
         userAgent,
         status: "failed",
-        failureReason: "User login via Google/OAuth",
+        failureReason: "User login via OAuth",
         location,
       });
       return res
@@ -78,6 +82,23 @@ export const login = async (req, res) => {
         message:
           "Your account has not been verified, please verify the OTP first",
         needVerification: true,
+      });
+    }
+
+    if (!user.is_active) {
+      await createLoginLog({
+        userId: user.id,
+        identifier,
+        ipAddress,
+        userAgent,
+        status: "failed",
+        failureReason: "Account has been suspended by the Admin",
+        location,
+      });
+      return res.status(403).json({
+        status: "failed",
+        message:
+          "Your account has been suspended by the Admin. Please contact support.",
       });
     }
 
@@ -127,7 +148,7 @@ export const login = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      message: "Login success",
+      message: "Login successful",
       data: {
         id: user.id,
         username: user.username,
@@ -195,6 +216,23 @@ export const googleLogin = async (req, res) => {
       });
     }
 
+    if (!user.is_active) {
+      await createLoginLog({
+        userId: user.id,
+        identifier: email,
+        ipAddress,
+        userAgent,
+        status: "failed",
+        failureReason: "Account has been suspended by the Admin",
+        location,
+      });
+      return res.status(403).json({
+        status: "failed",
+        message:
+          "Your account has been suspended by the Admin. Please contact support.",
+      });
+    }
+
     const accessToken = jwt.sign(
       { id: user.id, role: user.role },
       process.env.ACCESS_TOKEN_KEY,
@@ -220,7 +258,7 @@ export const googleLogin = async (req, res) => {
       ipAddress,
       userAgent,
       status: "success",
-      failureReason: "Login via Google OAuth",
+      failureReason: null,
       location,
     });
 

@@ -1,6 +1,6 @@
-import { flagUserForDeletion, deleteUser } from "../models/deleteUserModel.js";
-import { findUser } from "../models/changePasswordModel.js";
-import { findOtp, incrementOtpAttempt } from "../models/otpModel.js";
+import { flagUserForDeletion, deleteUser } from "../models/userModel.js";
+import { findUser } from "../models/userModel.js";
+import { findOtp, verifyOtp, incrementOtpAttempt } from "../models/otpModel.js";
 import { v4 as uuidv4 } from "uuid";
 import { generateOTP } from "../service/otpService.js";
 import {
@@ -8,7 +8,6 @@ import {
   sendAdminDeletionEmail,
   sendUserDeletionPendingEmail,
 } from "../service/emailService.js";
-import AuthModel from "../models/prismaModel.js";
 
 export const requestDeleteAccount = async (req, res) => {
   try {
@@ -92,7 +91,7 @@ export const confirmDeleteAccount = async (req, res) => {
       console.error("Failed to send deletion notification email: ", emailError);
     }
 
-    await AuthModel.verifyOtp(otpEntry.id, user.id);
+    await verifyOtp(otpEntry.id, user.id);
 
     return res.status(200).json({
       status: "success",

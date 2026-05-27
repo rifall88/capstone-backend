@@ -10,7 +10,7 @@ import { isAdmin } from "../middlewares/isAdmin.js";
 const router = express.Router();
 
 router.post("/request-delete", authenticate, requestDeleteAccount);
-router.post("/verify-delete", authenticate, confirmDeleteAccount);
+router.post("/verify-otp", authenticate, confirmDeleteAccount);
 router.delete("/:id", authenticate, isAdmin, softDelete);
 
 export default router;

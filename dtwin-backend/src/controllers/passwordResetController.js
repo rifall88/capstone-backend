@@ -1,15 +1,14 @@
 import { findEmail } from "../models/userModel.js";
-import { findOtp, incrementOtpAttempt } from "../models/otpModel.js";
+import { findOtp, verifyOtp, incrementOtpAttempt } from "../models/otpModel.js";
 import {
   createPasswordResetToken,
   findResetToken,
-  executePasswordReset,
 } from "../models/passwordResetModel.js";
+import { executePasswordReset } from "../models/userModel.js";
 import { generateOTP } from "../service/otpService.js";
 import { sendOtpEmail } from "../service/emailService.js";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
-import AuthModel from "../models/prismaModel.js";
 
 export const forgotPassword = async (req, res) => {
   try {
@@ -84,7 +83,7 @@ export const verifyForgotPasswordOTP = async (req, res) => {
       });
     }
 
-    await AuthModel.verifyOtp(otpEntry.id, user.id);
+    await verifyOtp(otpEntry.id, user.id);
 
     const idUuid = uuidv4();
     const resetToken = uuidv4();

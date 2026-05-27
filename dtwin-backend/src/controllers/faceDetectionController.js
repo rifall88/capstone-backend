@@ -1,4 +1,4 @@
-import { createFaceAnalyticsLog } from "../models/faceDetectionModel.js";
+import { createFaceAnalyticsLog } from "../models/analyticModel.js";
 import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
 import axios from "axios";

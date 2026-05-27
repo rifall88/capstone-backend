@@ -1,11 +1,10 @@
-import { registerUser, findEmail } from "../models/userModel.js";
+import { registerUser, findUser, findEmail } from "../models/userModel.js";
 import { createProfile } from "../models/profileModel.js";
-import { findOtp, incrementOtpAttempt } from "../models/otpModel.js";
+import { findOtp, verifyOtp, incrementOtpAttempt } from "../models/otpModel.js";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import { generateOTP } from "../service/otpService.js";
 import { sendOtpEmail } from "../service/emailService.js";
-import AuthModel from "../models/prismaModel.js";
 
 export const register = async (req, res) => {
   try {
@@ -103,7 +102,7 @@ export const verifyOTP = async (req, res) => {
       });
     }
 
-    await AuthModel.verifyOtp(otpEntry.id, user.id);
+    await verifyOtp(otpEntry.id, user.id);
 
     return res
       .status(200)
