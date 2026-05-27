@@ -56,3 +56,33 @@ export const incrementOtpAttempt = async (id, currentAttempt) => {
 
   return result.rows[0];
 };
+
+export const verifyOtp = async (otpEntryId, userId) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    await client.query(
+      `UPDATE authentication.otp_logs 
+       SET is_used = true 
+       WHERE id = $1`,
+      [otpEntryId],
+    );
+
+    await client.query(
+      `UPDATE authentication.users 
+       SET is_verified = true 
+       WHERE id = $1`,
+      [userId],
+    );
+
+    await client.query("COMMIT");
+    return true;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
