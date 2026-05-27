@@ -31,6 +31,9 @@
       "name": "Profiles"
     },
     {
+      "name": "Delete User"
+    },
+    {
       "name": "Analytics"
     }
   ],
@@ -57,7 +60,7 @@
           }
         },
         "responses": {
-          "201": { "description": "Register success." }
+          "201": { "description": "Registration successful." }
         }
       }
     },
@@ -104,7 +107,7 @@
           }
         },
         "responses": {
-          "200": { "description": "Login oauth success." }
+          "200": { "description": "OAuth login successful." }
         }
       }
     },
@@ -128,7 +131,7 @@
           }
         },
         "responses": {
-          "200": { "description": "Login success." }
+          "200": { "description": "Login successful." }
         }
       },
       "put": {
@@ -149,7 +152,7 @@
           }
         },
         "responses": {
-          "200": { "description": "Refresh token success." }
+          "200": { "description": "Refresh token successful." }
         }
       },
       "delete": {
@@ -171,7 +174,7 @@
           }
         },
         "responses": {
-          "200": { "description": "Delete token success." }
+          "200": { "description": "Token deletion successful." }
         }
       }
     },
@@ -274,6 +277,32 @@
         }
       }
     },
+    "/change-email/verify-otp": {
+      "post": {
+        "tags": ["Change Email"],
+        "summary": "Verify OTP",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": { "type": "string" }
+                },
+                "required": ["code"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Change email successful."
+          }
+        }
+      }
+    },
     "/change-password": {
       "put": {
         "tags": ["Change Password"],
@@ -296,33 +325,7 @@
         },
         "responses": {
           "200": {
-            "description": "Password successfully changed."
-          }
-        }
-      }
-    },
-    "/change-email/verify-otp": {
-      "post": {
-        "tags": ["Change Email"],
-        "summary": "Verify OTP",
-        "security": [{ "bearerAuth": [] }],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "code": { "type": "string" }
-                },
-                "required": ["code"]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OTP code for change email has been sent to your new email."
+            "description": "Password changed successfully."
           }
         }
       }
@@ -357,7 +360,7 @@
           }
         },
         "responses": {
-          "200": { "description": "Refresh token success." }
+          "200": { "description": "Profile updated successfully." }
         }
       },
       "get": {
@@ -366,6 +369,74 @@
         "security": [{ "bearerAuth": [] }],
         "responses": {
           "200": { "description": "Ok." }
+        }
+      }
+    },
+    "/Profiles/all": {
+      "get": {
+        "tags": ["Profiles"],
+        "summary": "Get all users (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Ok." }
+        }
+      }
+    },
+    "/delete-user/request-delete": {
+      "post": {
+        "tags": ["Delete User"],
+        "summary": "Request delete",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "OTP to confirm account deletion has been sent to your email."
+          }
+        }
+      }
+    },
+    "/delete-user/verify-otp": {
+      "post": {
+        "tags": ["Delete User"],
+        "summary": "Verify OTP",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": { "type": "string" }
+                },
+                "required": ["code"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Account deletion request successful."
+          }
+        }
+      }
+    },
+    "/delete-user/{id}": {
+      "delete": {
+        "tags": ["Delete User"],
+        "summary": "Delete user by id (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deletion successful."
+          }
         }
       }
     },
@@ -389,7 +460,7 @@
           }
         },
         "responses": {
-          "200": { "description": "Ok." }
+          "200": { "description": "Daily check-in successful." }
         }
       }
     }
