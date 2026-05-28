@@ -15,13 +15,13 @@ import loginLogRoute from "./routes/loginLogRoute.js";
 
 dotenv.config();
 
+const app = express();
 app.use(
   cors({
     origin: ["http://localhost:5173"],
     credentials: true,
   }),
 );
-const app = express();
 app.set("trust proxy", true);
 const port = process.env.PORT;
 
