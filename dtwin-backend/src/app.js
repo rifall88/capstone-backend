@@ -28,6 +28,7 @@ app.use("/forgot-password", passwordResetRoute);
 app.use("/change-email", changeEmailRoute);
 app.use("/change-password", changePasswordRoute);
 app.use("/delete-user", deleteUserRoute);
+app.use("/uploads", express.static("uploads"));
 
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 

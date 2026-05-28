@@ -4,6 +4,7 @@ import {
   putProfile,
   getUserProfile,
   getAllUser,
+  getPhotoProfile,
 } from "../controllers/profileController.js";
 import { updateProfileValidation } from "../validations/profileValidation.js";
 import { authenticate } from "../middlewares/authMiddleware.js";
@@ -58,6 +59,7 @@ router.put(
   putProfile,
 );
 router.get("/", authenticate, getUserProfile);
+router.get("/photo-profile", authenticate, getPhotoProfile);
 router.get("/all", authenticate, isAdmin, getAllUser);
 
 export default router;

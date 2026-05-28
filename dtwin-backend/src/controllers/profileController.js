@@ -4,6 +4,8 @@ import {
   findUserAllProfile,
 } from "../models/profileModel.js";
 import { formatDateForFE } from "../utils/dateFormatter.js";
+import path from "path";
+import fs from "fs";
 
 export const putProfile = async (req, res) => {
   const { full_name, phone, birth_date, gender } = req.body;
@@ -122,6 +124,51 @@ export const getUserProfile = async (req, res) => {
   } catch (error) {
     console.error("Getting user error: ", error.message);
     res.status(500).json({
+      status: "failed",
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getPhotoProfile = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const user = await findUserProfile(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: "failed",
+        message: "User not found",
+      });
+    }
+
+    const imagePath = user.profile_image;
+    console.log(imagePath);
+
+    if (!imagePath) {
+      return res.status(404).json({
+        status: "failed",
+        message: "User does not have a profile photo",
+      });
+    }
+
+    const filePath = path.join(process.cwd(), imagePath);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Photo file is missing from the server",
+      });
+    }
+
+    return res.status(200).sendFile(filePath, {
+      headers: {
+        "Content-Disposition": `inline; filename="${path.basename(filePath)}"`,
+      },
+    });
+  } catch (error) {
+    console.error("Getting photo profile error:", error);
+    return res.status(500).json({
       status: "failed",
       message: "Internal server error",
     });

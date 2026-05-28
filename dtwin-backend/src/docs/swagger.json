@@ -365,6 +365,16 @@
         }
       }
     },
+    "/Profiles/photo-profile": {
+      "get": {
+        "tags": ["Profiles"],
+        "summary": "Get photo profile user",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Ok." }
+        }
+      }
+    },
     "/Profiles/all": {
       "get": {
         "tags": ["Profiles"],
