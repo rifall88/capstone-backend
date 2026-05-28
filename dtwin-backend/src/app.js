@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "./docs/swagger.json" with { type: "json" };
 import userRoute from "./routes/userRoute.js";
@@ -14,6 +15,12 @@ import loginLogRoute from "./routes/loginLogRoute.js";
 
 dotenv.config();
 
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    credentials: true,
+  }),
+);
 const app = express();
 app.set("trust proxy", true);
 const port = process.env.PORT;

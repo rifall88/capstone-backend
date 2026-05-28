@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "http://192.168.20.31:2051",
+      "url": "https://dtwin.projectbase.my.id",
       "description": "Development Server"
     }
   ],
