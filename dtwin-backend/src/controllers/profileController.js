@@ -23,6 +23,44 @@ export const putProfile = async (req, res) => {
       }),
     );
 
+    if (data.birth_date) {
+      const parsedDate = new Date(data.birth_date);
+
+      if (isNaN(parsedDate.getTime())) {
+        return res.status(400).json({
+          status: "failed",
+          message: "Invalid birth_date format",
+        });
+      }
+
+      const today = new Date();
+      let age = today.getFullYear() - parsedDate.getFullYear();
+      const monthDiff = today.getMonth() - parsedDate.getMonth();
+
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < parsedDate.getDate())
+      ) {
+        age--;
+      }
+
+      if (age < 13) {
+        return res.status(400).json({
+          status: "failed",
+          message: "You must be at least 13 years old to use this application",
+        });
+      }
+
+      if (age > 80) {
+        return res.status(400).json({
+          status: "failed",
+          message: "Age cannot exceed 80 years. Please check your birth date",
+        });
+      }
+
+      data.birth_date = parsedDate;
+    }
+
     if (req.file) {
       data.profile_image = `uploads/${req.file.filename}`;
     }

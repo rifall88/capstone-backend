@@ -347,14 +347,7 @@
                   "birth_date": { "type": "string", "format": "date" },
                   "gender": { "type": "string", "enum": ["male", "female"] },
                   "profile_image": { "type": "string", "format": "binary" }
-                },
-                "required": [
-                  "full_name",
-                  "phone",
-                  "birth_date",
-                  "gender",
-                  "profile_image"
-                ]
+                }
               }
             }
           }

@@ -5,8 +5,10 @@ import {
   getUserProfile,
   getAllUser,
 } from "../controllers/profileController.js";
+import { updateProfileValidation } from "../validations/profileValidation.js";
 import { authenticate } from "../middlewares/authMiddleware.js";
 import { isAdmin } from "../middlewares/isAdmin.js";
+import { validateRequest } from "../middlewares/validationMiddleware.js";
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, "uploads"),
@@ -52,6 +54,7 @@ router.put(
       next();
     });
   },
+  validateRequest(updateProfileValidation),
   putProfile,
 );
 router.get("/", authenticate, getUserProfile);

@@ -7,14 +7,6 @@ dotenv.config();
 export const scanAndRecordFace = async (req, res) => {
   const { image_base64 } = req.body;
   const userId = req.user.id;
-
-  if (!image_base64) {
-    return res.status(400).json({
-      status: "failed",
-      message: "The image snapshot from the camera cannot be blank",
-    });
-  }
-
   try {
     const pythonResponse = await axios.post(
       process.env.FACE_DETECTION,

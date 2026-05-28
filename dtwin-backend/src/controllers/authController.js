@@ -179,13 +179,6 @@ export const googleLogin = async (req, res) => {
 
   try {
     const { idToken } = req.body;
-
-    if (!idToken) {
-      return res
-        .status(400)
-        .json({ status: "failed", message: "ID token is required" });
-    }
-
     const ticket = await client.verifyIdToken({
       idToken: idToken,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -294,13 +287,6 @@ export const googleLogin = async (req, res) => {
 
 export const refresh = async (req, res) => {
   const { refreshToken } = req.body;
-
-  if (!refreshToken) {
-    return res
-      .status(400)
-      .json({ status: "failed", message: "Refresh token is required" });
-  }
-
   try {
     const tokenData = await findValidRefreshToken(refreshToken);
     if (!tokenData) {
@@ -347,12 +333,6 @@ export const refresh = async (req, res) => {
 
 export const deletetkn = async (req, res) => {
   const { refreshToken } = req.body;
-
-  if (!refreshToken) {
-    return res
-      .status(400)
-      .json({ status: "failed", message: "Refresh token is required" });
-  }
 
   try {
     const hpsToken = await revokeRefreshToken(refreshToken);

@@ -4,11 +4,25 @@ import {
   resetPassword,
   verifyForgotPasswordOTP,
 } from "../controllers/passwordResetController.js";
+import {
+  forgotPasswordValidation,
+  verifyForgotOtpValidation,
+  resetPasswordValidation,
+} from "../validations/passwordResetValidation.js";
+import { validateRequest } from "../middlewares/validationMiddleware.js";
 
 const router = express.Router();
 
-router.post("/", forgotPassword);
-router.post("/verify-otp", verifyForgotPasswordOTP);
-router.post("/reset-password", resetPassword);
+router.post("/", validateRequest(forgotPasswordValidation), forgotPassword);
+router.post(
+  "/verify-otp",
+  validateRequest(verifyForgotOtpValidation),
+  verifyForgotPasswordOTP,
+);
+router.post(
+  "/reset-password",
+  validateRequest(resetPasswordValidation),
+  resetPassword,
+);
 
 export default router;
