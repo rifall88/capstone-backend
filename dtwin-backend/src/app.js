@@ -10,6 +10,7 @@ import passwordResetRoute from "./routes/passwordResetRoute.js";
 import changeEmailRoute from "./routes/changeEmailRoute.js";
 import changePasswordRoute from "./routes/changePasswordRoute.js";
 import deleteUserRoute from "./routes/deleteUserRoute.js";
+import loginLogRoute from "./routes/loginLogRoute.js";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use("/forgot-password", passwordResetRoute);
 app.use("/change-email", changeEmailRoute);
 app.use("/change-password", changePasswordRoute);
 app.use("/delete-user", deleteUserRoute);
+app.use("/login-log", loginLogRoute);
 app.use("/uploads", express.static("uploads"));
 
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDocument));

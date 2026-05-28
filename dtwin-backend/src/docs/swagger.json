@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://dtwin.projectbase.my.id",
+      "url": "http://192.168.20.31:2051",
       "description": "Development Server"
     }
   ],
@@ -17,6 +17,9 @@
     },
     {
       "name": "Auth"
+    },
+    {
+      "name": "Login Log"
     },
     {
       "name": "Forgot Password"
@@ -175,6 +178,16 @@
         },
         "responses": {
           "200": { "description": "Token deletion successful." }
+        }
+      }
+    },
+    "/login-log": {
+      "get": {
+        "tags": ["Login Log"],
+        "summary": "Get all login logs (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Ok." }
         }
       }
     },
@@ -365,7 +378,7 @@
         }
       }
     },
-    "/Profiles/photo-profile": {
+    "/profiles/photo-profile": {
       "get": {
         "tags": ["Profiles"],
         "summary": "Get photo profile user",
@@ -375,7 +388,7 @@
         }
       }
     },
-    "/Profiles/all": {
+    "/profiles/all": {
       "get": {
         "tags": ["Profiles"],
         "summary": "Get all users (admin only)",

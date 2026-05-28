@@ -21,3 +21,16 @@ export const createLoginLog = async (data) => {
 
   return result.rows[0];
 };
+
+export const getAllLoginLogs = async () => {
+  const result = await pool.query(
+    `SELECT id, identifier, ip_address, user_agent,
+     status, failure_reason, location, created_at
+     FROM authentication.login_logs
+     ORDER BY created_at ASC
+     LIMIT $1`,
+    [500],
+  );
+
+  return result.rows;
+};
