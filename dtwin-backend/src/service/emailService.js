@@ -32,6 +32,50 @@ export const sendOtpEmail = async (targetEmail, otpCode) => {
   return await transporter.sendMail(mailOptions);
 };
 
+export const sendChangeEmailOtpEmail = async (targetEmail, otpCode) => {
+  const mailOptions = {
+    from: `"Smart Digital Twin" <${process.env.MAIL_USER}>`,
+    to: targetEmail,
+    subject: "Kode OTP Perubahan Email",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
+        <h2 style="color: #333; text-align: center;">Perubahan Alamat Email</h2>
+        <p>Halo, kami menerima permintaan untuk mengubah alamat email akun Smart Digital Twin kamu. Gunakan kode OTP di bawah ini untuk memverifikasi email baru kamu:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #4CAF50; background: #f4f4f4; padding: 10px 20px; border-radius: 5px; display: inline-block;">
+            ${otpCode}
+          </span>
+        </div>
+        <p style="color: #777; font-size: 12px; text-align: center;">Kode OTP ini hanya berlaku selama 5 menit. Jika kamu tidak meminta perubahan email ini, abaikan pesan ini.</p>
+      </div>
+    `,
+  };
+
+  return await transporter.sendMail(mailOptions);
+};
+
+export const sendForgotPasswordOtpEmail = async (targetEmail, otpCode) => {
+  const mailOptions = {
+    from: `"Smart Digital Twin" <${process.env.MAIL_USER}>`,
+    to: targetEmail,
+    subject: "Kode OTP Reset Password",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
+        <h2 style="color: #333; text-align: center;">Reset Password Akun</h2>
+        <p>Halo, kami menerima permintaan untuk mengatur ulang (*reset*) password akun Smart Digital Twin kamu. Gunakan kode OTP di bawah ini untuk melanjutkan:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #2196F3; background: #f4f4f4; padding: 10px 20px; border-radius: 5px; display: inline-block;">
+            ${otpCode}
+          </span>
+        </div>
+        <p style="color: #777; font-size: 12px; text-align: center;">Kode OTP ini hanya berlaku selama 5 menit. Jika kamu tidak merasa meminta reset password, abaikan email ini dan pastikan akunmu aman.</p>
+      </div>
+    `,
+  };
+
+  return await transporter.sendMail(mailOptions);
+};
+
 export const sendDeleteAccountOtpEmail = async (targetEmail, otpCode) => {
   const mailOptions = {
     from: `"Smart Digital Twin" <${process.env.MAIL_USER}>`,

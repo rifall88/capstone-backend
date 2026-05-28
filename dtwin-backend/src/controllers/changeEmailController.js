@@ -3,9 +3,10 @@ import {
   verifyOtp,
   incrementOtpAttempt,
 } from "../models/otpModel.js";
+import { findEmail } from "../models/userModel.js";
 import { changeEmail } from "../models/userModel.js";
 import { generateOTP } from "../service/otpService.js";
-import { sendOtpEmail } from "../service/emailService.js";
+import { sendChangeEmailOtpEmail } from "../service/emailService.js";
 import { v4 as uuidv4 } from "uuid";
 
 export const updateEmail = async (req, res) => {
@@ -13,8 +14,16 @@ export const updateEmail = async (req, res) => {
     const { email } = req.body;
     const userId = req.user.id;
 
+    const existingUser = await findEmail(email);
+    if (existingUser) {
+      return res.status(400).json({
+        status: "failed",
+        message: "Email is already registered.",
+      });
+    }
+
     const otpData = await generateOTP(userId, email, "change_email");
-    await sendOtpEmail(email, otpData.otp_code);
+    await sendChangeEmailOtpEmail(email, otpData.otp_code);
 
     return res.status(200).json({
       status: "success",
@@ -22,12 +31,6 @@ export const updateEmail = async (req, res) => {
       data: { email },
     });
   } catch (error) {
-    if (error.code === "23505") {
-      return res.status(400).json({
-        status: "failed",
-        message: "Email is already registered.",
-      });
-    }
     console.error("Change email error", error);
     return res
       .status(500)

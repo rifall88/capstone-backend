@@ -6,7 +6,7 @@ import {
 } from "../models/passwordResetModel.js";
 import { executePasswordReset } from "../models/userModel.js";
 import { generateOTP } from "../service/otpService.js";
-import { sendOtpEmail } from "../service/emailService.js";
+import { sendForgotPasswordOtpEmail } from "../service/emailService.js";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 
@@ -22,7 +22,7 @@ export const forgotPassword = async (req, res) => {
     }
 
     const otpData = await generateOTP(user.id, user.email, "forgot_password");
-    await sendOtpEmail(user.email, otpData.otp_code);
+    await sendForgotPasswordOtpEmail(user.email, otpData.otp_code);
 
     return res.status(200).json({
       status: "success",
