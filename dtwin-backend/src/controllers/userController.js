@@ -55,11 +55,10 @@ export const register = async (req, res) => {
 };
 
 export const verifyOTP = async (req, res) => {
-  const { email, code } = req.body;
-
   try {
-    const user = await findEmail(email);
+    const { email, code } = req.body;
 
+    const user = await findEmail(email);
     if (!user) {
       return res
         .status(404)

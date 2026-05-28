@@ -38,9 +38,9 @@ export const forgotPassword = async (req, res) => {
 };
 
 export const verifyForgotPasswordOTP = async (req, res) => {
-  const { email, code } = req.body;
-
   try {
+    const { email, code } = req.body;
+
     const user = await findEmail(email);
     if (!user) {
       return res

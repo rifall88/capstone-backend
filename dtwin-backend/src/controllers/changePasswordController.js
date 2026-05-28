@@ -7,13 +7,6 @@ export const updatePassword = async (req, res) => {
     const { oldPassword, newPassword } = req.body;
     const userId = req.user.id;
 
-    if (!oldPassword || !newPassword) {
-      return res.status(400).json({
-        status: "failed",
-        message: "Old password and new password are required",
-      });
-    }
-
     const user = await findUser(userId);
     if (!user) {
       return res

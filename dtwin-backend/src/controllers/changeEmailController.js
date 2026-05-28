@@ -39,12 +39,11 @@ export const updateEmail = async (req, res) => {
 };
 
 export const verifyOTP = async (req, res) => {
-  const { code } = req.body;
-  const userId = req.user.id;
-
   try {
-    const otpEntry = await findOtpByUserId(userId);
+    const { code } = req.body;
+    const userId = req.user.id;
 
+    const otpEntry = await findOtpByUserId(userId);
     if (!otpEntry) {
       return res
         .status(400)

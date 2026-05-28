@@ -107,10 +107,10 @@ export const confirmDeleteAccount = async (req, res) => {
 };
 
 export const softDelete = async (req, res) => {
-  const userId = req.params.id;
   try {
-    const deletedUser = await deleteUser(userId);
+    const userId = req.params.id;
 
+    const deletedUser = await deleteUser(userId);
     if (!deletedUser) {
       return res
         .status(404)

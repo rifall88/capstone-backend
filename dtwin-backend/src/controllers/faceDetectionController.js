@@ -5,9 +5,10 @@ import axios from "axios";
 dotenv.config();
 
 export const scanAndRecordFace = async (req, res) => {
-  const { image_base64 } = req.body;
-  const userId = req.user.id;
   try {
+    const { image_base64 } = req.body;
+    const userId = req.user.id;
+
     const pythonResponse = await axios.post(
       process.env.FACE_DETECTION,
       { image_base64 },

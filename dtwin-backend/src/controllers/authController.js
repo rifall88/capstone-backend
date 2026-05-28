@@ -22,11 +22,13 @@ dotenv.config();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const login = async (req, res) => {
-  const ipAddress =
+  let ipAddress =
     req.headers["cf-connecting-ip"] ||
     req.headers["x-forwarded-for"] ||
     req.ip ||
-    req.socket.remoteAddress;
+    req.socket.remoteAddress ||
+    "Unknown";
+  ipAddress = ipAddress.replace(/^::ffff:/, "");
   const countryCode = req.headers["cf-ipcountry"] || "Unknown";
   const userAgent = req.headers["user-agent"] || "Unknown Device";
   const geo = geoip.lookup(ipAddress);
@@ -36,7 +38,6 @@ export const login = async (req, res) => {
     const { identifier, password } = req.body;
 
     const user = await findEmailOrUsername(identifier);
-
     if (!user) {
       await createLoginLog({
         userId: null,
@@ -167,11 +168,13 @@ export const login = async (req, res) => {
 };
 
 export const googleLogin = async (req, res) => {
-  const ipAddress =
+  let ipAddress =
     req.headers["cf-connecting-ip"] ||
     req.headers["x-forwarded-for"] ||
     req.ip ||
-    req.socket.remoteAddress;
+    req.socket.remoteAddress ||
+    "Unknown";
+  ipAddress = ipAddress.replace(/^::ffff:/, "");
   const countryCode = req.headers["cf-ipcountry"] || "Unknown";
   const userAgent = req.headers["user-agent"] || "Unknown Device";
   const geo = geoip.lookup(ipAddress);
@@ -286,8 +289,9 @@ export const googleLogin = async (req, res) => {
 };
 
 export const refresh = async (req, res) => {
-  const { refreshToken } = req.body;
   try {
+    const { refreshToken } = req.body;
+
     const tokenData = await findValidRefreshToken(refreshToken);
     if (!tokenData) {
       return res.status(401).json({
@@ -332,11 +336,10 @@ export const refresh = async (req, res) => {
 };
 
 export const deletetkn = async (req, res) => {
-  const { refreshToken } = req.body;
-
   try {
-    const hpsToken = await revokeRefreshToken(refreshToken);
+    const { refreshToken } = req.body;
 
+    const hpsToken = await revokeRefreshToken(refreshToken);
     if (!hpsToken) {
       return res.status(400).json({
         status: "failed",

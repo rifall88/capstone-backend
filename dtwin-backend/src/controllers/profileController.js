@@ -8,10 +8,10 @@ import path from "path";
 import fs from "fs";
 
 export const putProfile = async (req, res) => {
-  const { full_name, phone, birth_date, gender } = req.body;
-  const userId = req.user.id;
-
   try {
+    const { full_name, phone, birth_date, gender } = req.body;
+    const userId = req.user.id;
+
     const data = Object.fromEntries(
       Object.entries({
         full_name,
@@ -98,8 +98,9 @@ export const putProfile = async (req, res) => {
 };
 
 export const getUserProfile = async (req, res) => {
-  const userId = req.user.id;
   try {
+    const userId = req.user.id;
+
     const user = await findUserProfile(userId);
     if (!user) {
       return res.status(404).json({
@@ -131,9 +132,9 @@ export const getUserProfile = async (req, res) => {
 };
 
 export const getPhotoProfile = async (req, res) => {
-  const userId = req.user.id;
-
   try {
+    const userId = req.user.id;
+
     const user = await findUserProfile(userId);
     if (!user) {
       return res.status(404).json({
