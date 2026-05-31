@@ -4,7 +4,7 @@ import { formatDateForFE, parseUserAgent } from "../utils/dateFormatter.js";
 export const viewLoginLogs = async (req, res) => {
   try {
     const logs = await getAllLoginLogs();
-    
+
     const formattedLogs = logs.map((log) => {
       return {
         id: log.id,
@@ -14,7 +14,8 @@ export const viewLoginLogs = async (req, res) => {
         device: parseUserAgent(log.user_agent),
         location: log.location || "Unknown",
         status: log.status,
-        message: log.status ? "Login successful" : log.failure_reason,
+        message:
+          log.status === "success" ? "Login successful" : log.failure_reason,
       };
     });
 

@@ -114,3 +114,30 @@ export const verifyOTP = async (req, res) => {
     });
   }
 };
+
+export const resendOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await findEmail(email);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ status: "failed", message: "Email is not registered" });
+    }
+
+    const otpData = await generateOTP(user.id, user.email, "forgot_password");
+    await sendOtpEmail(user.email, otpData.otp_code);
+
+    return res.status(200).json({
+      status: "success",
+      message: "OTP code has been sent to your email for account verification",
+      data: { email: user.email },
+    });
+  } catch (error) {
+    console.error("Resend OTP error", error);
+    return res
+      .status(500)
+      .json({ status: "failed", message: "Internal server error" });
+  }
+};

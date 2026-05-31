@@ -51,7 +51,6 @@ model User {
   password_resets    PasswordReset[]
   login_logs         LoginLog[]
   analytics_logs     FaceAnalyticsLog[]
-  user_goals         UserGoal[]
   daily_logs         DailyLog[]
 
   @@map("users")
@@ -152,46 +151,32 @@ model FaceAnalyticsLog {
   @@schema("analytics")
 }
 
-model UserGoal {
-  id                 String    @id @default(uuid()) @db.Uuid
-  user_id            String    @unique @db.Uuid
-  focus_sleep        Boolean   @default(false)
-  focus_productivity Boolean   @default(false)
-  focus_fitness      Boolean   @default(false)
-  focus_screen_time  Boolean   @default(false)
-  created_at         DateTime  @default(now()) @db.Timestamp
-  updated_at         DateTime  @default(now()) @updatedAt @db.Timestamp(0)
-  deleted_at         DateTime? @db.Timestamp(0)
-  user               User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@map("user_goals")
-  @@schema("user_management")
-}
-
 model DailyLog {
-  log_id                     String    @id @default(uuid()) @db.Uuid
+  id                         String    @id @default(uuid()) @db.Uuid
   user_id                    String    @db.Uuid
   log_date                   DateTime  @db.Date
   is_weekend                 Boolean   @default(false)
-  sleep_duration             Decimal?  @db.Decimal(5, 2)
-  sleep_quality              Int?
-  study_work_duration        Decimal?  @db.Decimal(5, 2)
-  break_duration             Decimal?  @db.Decimal(5, 2)
-  physical_activity_duration Decimal?  @db.Decimal(5, 2)
-  screen_time_duration       Decimal?  @db.Decimal(5, 2)
-  stress_level               Int?
-  mood_score                 Int?
-  focus_score                Int?
-  task_completed             Int?
-  task_planned               Int?
-  completion_ratio           Decimal?  @db.Decimal(5, 2)
-  fatigue_accumulation       Decimal?  @db.Decimal(5, 2)
-  productivity_score         Decimal?  @db.Decimal(5, 2)
+  sleep_duration             Float     @default(8.0)
+  study_work_duration        Float     @default(8.0)
+  break_duration             Float     @default(1.5)
+  exercise_duration          Float     @default(30.0)
+  downtime_duration          Float     @default(6.0)
+  stress_level               Int       @default(5)
+  mood_score                 Int       @default(5)
+  focus_score                Int       @default(5)
+  task_planned               Int       @default(4)
+  task_completed             Int       @default(2)
+  completion_ratio           Float     @default(0.0)
+  fatigue_accumulation       Float     @default(0.0)
+  productivity_score         Float     @default(0.0)
   created_at                 DateTime  @default(now()) @db.Timestamp
+  updated_at                 DateTime  @default(now()) @updatedAt @db.Timestamp(0)
   deleted_at                 DateTime? @db.Timestamp
+
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, log_date])
   @@map("daily_logs")
   @@schema("telemetry")
 }
+

@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://dtwin.projectbase.my.id",
+      "url": "http://192.168.20.31:2051",
       "description": "Development Server"
     }
   ],
@@ -88,6 +88,31 @@
         },
         "responses": {
           "200": { "description": "OTP verification successful." }
+        }
+      }
+    },
+    "/users/resend-otp": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Resend OTP",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP code has been sent to your email for account verification."
+          }
         }
       }
     },
@@ -477,6 +502,56 @@
         },
         "responses": {
           "200": { "description": "Daily check-in successful." }
+        }
+      }
+    },
+    "/analytics/predict": {
+      "post": {
+        "tags": ["Analytics"],
+        "summary": "Analyze daily activity and predict productivity",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "log_date": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2026-05-31",
+                    "description": "Optional. Defaults to current date if not provided."
+                  },
+                  "sleep_duration": { "type": "number", "example": 7.5 },
+                  "sleep_quality": { "type": "number", "example": 8 },
+                  "study_work_duration": { "type": "number", "example": 6.0 },
+                  "break_duration": { "type": "number", "example": 1.5 },
+                  "physical_activity_duration": {
+                    "type": "number",
+                    "example": 1.0
+                  },
+                  "screen_time_duration": { "type": "number", "example": 4.5 },
+                  "stress_level": { "type": "number", "example": 4 },
+                  "mood_score": { "type": "number", "example": 7 },
+                  "focus_score": { "type": "number", "example": 8 },
+                  "task_completed": { "type": "number", "example": 4 },
+                  "task_planned": { "type": "number", "example": 5 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Productivity analysis generated successfully."
+          },
+          "400": {
+            "description": "Bad Request. Returned if user goals are not set or if there are less than 7 days of logs."
+          },
+          "500": {
+            "description": "Internal server error or AI Microservice timeout/failure."
+          }
         }
       }
     }
