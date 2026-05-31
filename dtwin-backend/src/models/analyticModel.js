@@ -13,7 +13,7 @@ export const createFaceAnalyticsLog = async (data) => {
   } = data;
 
   const result = await pool.query(
-    `INSERT INTO analytics.face_analytics_logs 
+    `INSERT INTO analytics.face_detections 
     (id, user_id, predicted_age, confidence_score, emotion, gender, is_known_face, source) 
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING *`,
