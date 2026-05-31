@@ -10,7 +10,7 @@ import {
   createOauthUser,
 } from "../models/userModel.js";
 import { createLoginLog } from "../models/loginLogModel.js";
-import { createOauthProfile } from "../models/profileModel.js";
+import { createProfile } from "../models/profileModel.js";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import geoip from "geoip-lite";
@@ -205,10 +205,10 @@ export const googleLogin = async (req, res) => {
         provider_id: payload.sub,
       });
 
-      await createOauthProfile({
+      await createProfile({
         id: uuidv4(),
-        userId: userUuid,
-        fullname: name,
+        user_id: userUuid,
+        full_name: name,
       });
     }
 

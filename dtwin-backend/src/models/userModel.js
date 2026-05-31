@@ -2,7 +2,7 @@ import pool from "../databases/dbConfig.js";
 
 export const findUser = async (userId) => {
   const result = await pool.query(
-    "SELECT * FROM authentication.users WHERE id = $1",
+    "SELECT * FROM authentication.users WHERE id = $1 AND deleted_at IS NULL",
     [userId],
   );
   return result.rows[0];
@@ -10,7 +10,7 @@ export const findUser = async (userId) => {
 
 export const findEmail = async (email) => {
   const result = await pool.query(
-    "SELECT * FROM authentication.users WHERE email = $1",
+    "SELECT * FROM authentication.users WHERE email = $1 AND deleted_at IS NULL",
     [email],
   );
   return result.rows[0];
@@ -76,7 +76,7 @@ export const changeEmail = async (userId, email) => {
   const result = await pool.query(
     `UPDATE authentication.users
         SET email = $1, updated_at = NOW()
-        WHERE id = $2
+        WHERE id = $2 AND deleted_at IS NULL
         RETURNING*`,
     [email, userId],
   );
@@ -87,7 +87,7 @@ export const changePassword = async (userId, password) => {
   const result = await pool.query(
     `UPDATE authentication.users
         SET password = $1, updated_at = NOW()
-        WHERE id = $2
+        WHERE id = $2 AND deleted_at IS NULL
         RETURNING*`,
     [password, userId],
   );
@@ -98,7 +98,8 @@ export const flagUserForDeletion = async (userId) => {
   const result = await pool.query(
     `UPDATE authentication.users 
      SET deletion_requested = true, updated_at = NOW() 
-     WHERE id = $1 RETURNING id, email`,
+     WHERE id = $1 AND deleted_at IS NULL
+     RETURNING id, email`,
     [userId],
   );
   return result.rows[0];
@@ -112,7 +113,7 @@ export const executePasswordReset = async (userId, tokenId, hashedPassword) => {
     await client.query(
       `UPDATE authentication.users
        SET password = $1
-       WHERE id = $2`,
+       WHERE id = $2 AND deleted_at IS NULL`,
       [hashedPassword, userId],
     );
 
@@ -144,7 +145,7 @@ export const deleteUser = async (userId) => {
          deletion_requested = false,
          email = email || '_deleted_' || $2,
          username = username || '_deleted_' || $2
-     WHERE id = $1
+     WHERE id = $1 AND deleted_at IS NULL
      RETURNING *`,
     [userId, timestamp],
   );

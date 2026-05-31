@@ -156,19 +156,19 @@ model DailyLog {
   user_id                    String    @db.Uuid
   log_date                   DateTime  @db.Date
   is_weekend                 Boolean   @default(false)
-  sleep_duration             Float     @default(8.0)
-  study_work_duration        Float     @default(8.0)
-  break_duration             Float     @default(1.5)
-  exercise_duration          Float     @default(30.0)
-  downtime_duration          Float     @default(6.0)
-  stress_level               Int       @default(5)
-  mood_score                 Int       @default(5)
-  focus_score                Int       @default(5)
-  task_planned               Int       @default(4)
-  task_completed             Int       @default(2)
-  completion_ratio           Float     @default(0.0)
-  fatigue_accumulation       Float     @default(0.0)
-  productivity_score         Float     @default(0.0)
+  sleep_duration             Float
+  study_work_duration        Float
+  break_duration             Float
+  exercise_duration          Float
+  downtime_duration          Float
+  stress_level               Int
+  mood_score                 Int
+  focus_score                Int 
+  task_planned               Int
+  task_completed             Int
+  completion_ratio           Float
+  fatigue_accumulation       Float
+  productivity_score         Float
   created_at                 DateTime  @default(now()) @db.Timestamp
   updated_at                 DateTime  @default(now()) @updatedAt @db.Timestamp(0)
   deleted_at                 DateTime? @db.Timestamp

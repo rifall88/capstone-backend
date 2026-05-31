@@ -12,20 +12,6 @@ export const createProfile = async (data) => {
   return result.rows[0];
 };
 
-export const createOauthProfile = async (data) => {
-  const { id, userId, fullname } = data;
-
-  const result = await pool.query(
-    `INSERT INTO user_management.profile_users 
-    (id, user_id, full_name) 
-    VALUES ($1, $2, $3) 
-    RETURNING *`,
-    [id, userId, fullname],
-  );
-
-  return result.rows[0];
-};
-
 export const updateProfile = async (data, userId) => {
   const fields = [];
   const values = [];
@@ -42,7 +28,7 @@ export const updateProfile = async (data, userId) => {
   const query = `
     UPDATE user_management.profile_users
     SET ${fields.join(", ")}
-    WHERE user_id = $${index}
+    WHERE user_id = $${index} AND deleted_at IS NULL
     RETURNING *
   `;
 
@@ -68,7 +54,9 @@ export const findUserProfile = async (userId) => {
     p.birth_date, p.gender, p.profile_image, u.role
     FROM user_management.profile_users p 
     INNER JOIN authentication.users u ON p.user_id = u.id
-    WHERE p.user_id = $1 `,
+    WHERE p.user_id = $1 
+    AND u.deleted_at IS NULL
+    AND p.deleted_at IS NULL`,
     [userId],
   );
 
