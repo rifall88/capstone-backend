@@ -18,7 +18,8 @@ export const calculateStressLevel = (data) => {
 
   const sleep = data.sleep_duration;
   const work = data.study_work_duration;
-  const breaks = data.downtime_duration;
+  const breaks = data.break_duration;
+  const downTime = data.downtime_duration;
   const exercise = data.exercise_duration;
   const planned = data.task_planned;
   const completed = data.task_completed;
@@ -39,6 +40,14 @@ export const calculateStressLevel = (data) => {
     stress += 1;
   }
 
+  if (downTime > 12) {
+    stress += 3;
+  } else if (downTime > 9) {
+    stress += 2;
+  } else if (downTime > 6) {
+    stress += 1;
+  }
+
   const completionRatio = completed / planned;
   if (completionRatio < 0.3) {
     stress += 3;
@@ -48,7 +57,7 @@ export const calculateStressLevel = (data) => {
     stress += 1;
   }
 
-  if (work > 6 && breaks < 1) {
+  if (work > 6 && breaks < 2) {
     stress += 2;
   }
 
@@ -90,7 +99,7 @@ export const calculateFocusScore = (data) => {
     focus -= 1;
   }
 
-  if (work > 6 && breaks < 1) {
+  if (work > 6 && breaks < 2) {
     focus -= 2;
   }
 
@@ -102,7 +111,7 @@ export const calculateFocusScore = (data) => {
 };
 
 export const calculateProductivityScore = (data) => {
-  const SLEEP_MAX = 24.0;
+  const SLEEP_MAX = 15.0;
   const EXERCISE_MAX = 240.0;
 
   const sleepDuration = data.sleep_duration;
@@ -127,7 +136,7 @@ export const calculateProductivityScore = (data) => {
   const clippedScore = Math.max(0, Math.min(1, rawScore));
 
   const finalScore = clippedScore * 100;
-  return Number(finalScore.toFixed(2));
+  return Number(finalScore.toFixed(3));
 };
 
 export const calculateFatigueIndex = (data) => {
@@ -144,7 +153,7 @@ export const calculateFatigueIndex = (data) => {
     (downtime / DOWNTIME_MAX) * 30 +
     (study / STUDY_MAX) * 30;
 
-  return Number(Math.max(0, Math.min(100, rawFatigue)).toFixed(2));
+  return Number(Math.max(0, Math.min(100, rawFatigue)).toFixed(3));
 };
 
 export const calculateCumulativeFatigue = (
@@ -162,5 +171,5 @@ export const calculateCumulativeFatigue = (
   }
   const ema = currentFatigueIndex * ALPHA + previousCumulativeFatigue * DECAY;
 
-  return Number(Math.max(0, Math.min(100, ema)).toFixed(2));
+  return Number(Math.max(0, Math.min(100, ema)).toFixed(3));
 };

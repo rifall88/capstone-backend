@@ -21,12 +21,12 @@ router.post(
   validateRequest(confirmDeleteValidation),
   confirmDeleteAccount,
 );
-  router.delete(
-    "/:id",
-    authenticate,
-    isAdmin,
-    validateRequest(softDeleteValidation, "params"),
-    softDelete,
-  );
+router.delete(
+  "/:id",
+  authenticate,
+  isAdmin,
+  validateRequest(softDeleteValidation),
+  softDelete,
+);
 
 export default router;
