@@ -55,3 +55,12 @@ export const verifyOtpValidation = Joi.object({
     "any.required": "OTP code is required",
   }),
 });
+
+export const resendOtpValidation = Joi.object({
+  email: Joi.string().trim().email().max(100).required().messages({
+    "string.empty": "Email cannot be empty",
+    "string.email": "Please provide a valid email format",
+    "string.max": "Email must be at most 100 characters long",
+    "any.required": "Email is required",
+  }),
+});

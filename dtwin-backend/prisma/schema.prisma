@@ -171,7 +171,6 @@ model DailyLog {
   productivity_score         Float
   created_at                 DateTime  @default(now()) @db.Timestamp
   updated_at                 DateTime  @default(now()) @updatedAt @db.Timestamp(0)
-  deleted_at                 DateTime? @db.Timestamp
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 

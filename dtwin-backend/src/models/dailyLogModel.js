@@ -6,10 +6,18 @@ export const getPreviousDailyLog = async (data) => {
   const result = await pool.query(
     `SELECT * FROM analytics.daily_logs
     WHERE user_id = $1 AND log_date = $2
-    AND deleted_at IS NULL
     ORDER BY log_date DESC
     LIMIT 1`,
     [userId, beforeDate],
+  );
+
+  return result.rows[0];
+};
+
+export const findDailyLog = async (id, userId) => {
+  const result = await pool.query(
+    `SELECT * FROM analytics.daily_logs WHERE id = $1 AND user_id = $2`,
+    [id, userId],
   );
 
   return result.rows[0];
@@ -65,13 +73,63 @@ export const createDailyLog = async (data) => {
   return result.rows[0];
 };
 
-export const getUserGoals = async (userId) => {
+export const updateDailyLog = async (data) => {
+  const {
+    id,
+    user_id,
+    sleep_duration,
+    study_work_duration,
+    break_duration,
+    exercise_duration,
+    downtime_duration,
+    stress_level,
+    mood_score,
+    focus_score,
+    task_completed,
+    task_planned,
+    completion_ratio,
+    fatigue_accumulation,
+    productivity_score,
+  } = data;
+
   const result = await pool.query(
-    `SELECT focus_sleep, focus_productivity, focus_fitness, focus_screen_time 
-     FROM user_management.user_goals 
-     WHERE user_id = $1`,
-    [userId],
+    `UPDATE analytics.daily_logs 
+    SET 
+      sleep_duration = $1, 
+      study_work_duration = $2,
+      break_duration = $3, 
+      exercise_duration = $4, 
+      downtime_duration = $5, 
+      stress_level = $6, 
+      mood_score = $7,
+      focus_score = $8, 
+      task_completed = $9, 
+      task_planned = $10, 
+      completion_ratio = $11, 
+      fatigue_accumulation = $12, 
+      productivity_score = $13,
+      updated_at = NOW()
+    WHERE id = $14 AND user_id = $15
+    RETURNING *`,
+    [
+      sleep_duration,
+      study_work_duration,
+      break_duration,
+      exercise_duration,
+      downtime_duration,
+      stress_level,
+      mood_score,
+      focus_score,
+      task_completed,
+      task_planned,
+      completion_ratio,
+      fatigue_accumulation,
+      productivity_score,
+      id,
+      user_id,
+    ],
   );
+
   return result.rows[0];
 };
 
@@ -79,7 +137,7 @@ export const getUserGoals = async (userId) => {
 export const getLast7DailyLogs = async (userId) => {
   const result = await pool.query(
     `SELECT * FROM telemetry.daily_logs 
-     WHERE user_id = $1 AND deleted_at IS NULL
+     WHERE user_id = $1
      ORDER BY log_date ASC 
      LIMIT 7`,
     [userId],

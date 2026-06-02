@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "http://192.168.20.31:2051",
+      "url": "https://dtwin.projectbase.my.id",
       "description": "Development Server"
     }
   ],
@@ -523,7 +523,15 @@
                   "downtime_duration": { "type": "number" },
                   "task_planned": { "type": "integer" },
                   "task_completed": { "type": "integer" }
-                }
+                },
+                "required": [
+                  "sleep_duration",
+                  "study_work_duration",
+                  "exercise_duration",
+                  "downtime_duration",
+                  "task_planned",
+                  "task_completed"
+                ]
               }
             }
           }
@@ -531,6 +539,52 @@
         "responses": {
           "200": {
             "description": "Productivity analysis generated successfully."
+          }
+        }
+      }
+    },
+    "/analytics/predict/{id}": {
+      "put": {
+        "tags": ["Analytics"],
+        "summary": "Update analyze daily activity and predict productivity",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sleep_duration": { "type": "number" },
+                  "study_work_duration": { "type": "number" },
+                  "exercise_duration": { "type": "number" },
+                  "downtime_duration": { "type": "number" },
+                  "task_planned": { "type": "integer" },
+                  "task_completed": { "type": "integer" }
+                },
+                "required": [
+                  "sleep_duration",
+                  "study_work_duration",
+                  "exercise_duration",
+                  "downtime_duration",
+                  "task_planned",
+                  "task_completed"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Daily log successfully updated."
           }
         }
       }

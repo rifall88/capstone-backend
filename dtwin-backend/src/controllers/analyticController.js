@@ -5,6 +5,8 @@ import {
 import {
   createDailyLog,
   getPreviousDailyLog,
+  updateDailyLog,
+  findDailyLog,
 } from "../models/dailyLogModel.js";
 import { checkIsWeekendOrHoliday } from "../utils/holidayWeekend.js";
 import {
@@ -217,6 +219,127 @@ export const dailyLogAnalytic = async (req, res) => {
   }
 };
 
+export const updateDailyLogAnalytic = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const {
+      sleep_duration,
+      study_work_duration,
+      exercise_duration,
+      downtime_duration,
+      task_planned,
+      task_completed,
+    } = req.body;
+
+    if (task_completed > task_planned) {
+      return res.status(400).json({
+        status: "failed",
+        message: "Task completed cannot be greater than task planned",
+      });
+    }
+
+    const existingLog = await findDailyLog(id, userId);
+    if (!existingLog) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Daily log not found.",
+      });
+    }
+
+    const finalMoodScore = existingLog.mood_score;
+    const completionRatio = task_completed / task_planned;
+
+    const finalStressLevel = calculateStressLevel({
+      sleep_duration,
+      study_work_duration,
+      downtime_duration,
+      exercise_duration,
+      task_planned,
+      task_completed,
+    });
+
+    const finalFocusScore = calculateFocusScore({
+      sleep_duration,
+      study_work_duration,
+      downtime_duration,
+      exercise_duration,
+      task_planned,
+      task_completed,
+    });
+
+    const breakDuration = Math.max(
+      0,
+      24.0 -
+        (sleep_duration +
+          study_work_duration +
+          downtime_duration +
+          exercise_duration / 60),
+    );
+
+    const finalProductivityScore = calculateProductivityScore({
+      sleep_duration,
+      exercise_duration,
+      downtime_duration,
+      mood_score: finalMoodScore,
+      break_duration: breakDuration,
+      completion_ratio: completionRatio,
+      stress_level: finalStressLevel,
+      focus_score: finalFocusScore,
+    });
+
+    const currentFatigueIndex = calculateFatigueIndex({
+      stress_level: finalStressLevel,
+      downtime_duration,
+      study_work_duration,
+    });
+
+    const today = new Date();
+    const startOfToday = new Date(today.setHours(0, 0, 0, 0));
+
+    const previousLog = await getPreviousDailyLog(userId, startOfToday);
+    const previousFatigue = previousLog
+      ? previousLog.fatigue_accumulation
+      : null;
+
+    const finalFatigueAccumulation = calculateCumulativeFatigue(
+      currentFatigueIndex,
+      previousFatigue,
+    );
+
+    const updatedDailyLog = await updateDailyLog({
+      id: logId,
+      user_id: userId,
+      sleep_duration,
+      study_work_duration,
+      break_duration: breakDuration,
+      exercise_duration,
+      downtime_duration,
+      stress_level: finalStressLevel,
+      mood_score: finalMoodScore,
+      focus_score: finalFocusScore,
+      task_completed,
+      task_planned,
+      completion_ratio: completionRatio,
+      fatigue_accumulation: finalFatigueAccumulation,
+      productivity_score: finalProductivityScore,
+    });
+
+    return res.status(200).json({
+      status: "success",
+      message: "Daily log successfully updated.",
+      data: updatedDailyLog,
+    });
+  } catch (error) {
+    console.error("Update Productivity Error:", error.message);
+    return res.status(500).json({
+      status: "failed",
+      message: "Internal server error",
+    });
+  }
+};
+
 // export const analyzeDailyActivity = async (req, res) => {
 //   try {
 //     const userId = req.user.id;
@@ -312,4 +435,3 @@ export const dailyLogAnalytic = async (req, res) => {
 //       .json({ status: "failed", message: "Internal server error" });
 //   }
 // };
-

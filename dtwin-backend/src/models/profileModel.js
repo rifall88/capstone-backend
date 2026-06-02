@@ -13,27 +13,36 @@ export const createProfile = async (data) => {
 };
 
 export const updateProfile = async (data, userId) => {
+  const allowedColumns = [
+    "full_name",
+    "phone",
+    "birth_date",
+    "gender",
+    "profile_image",
+  ];
   const fields = [];
   const values = [];
   let index = 1;
 
   for (const key in data) {
-    fields.push(`${key} = $${index}`);
-    values.push(data[key]);
-    index++;
+    if (allowedColumns.includes(key)) {
+      fields.push(`${key} = $${index}`);
+      values.push(data[key]);
+      index++;
+    }
   }
 
   fields.push(`updated_at = NOW()`);
+  values.push(userId);
 
-  const query = `
-    UPDATE user_management.profile_users
+  const result = await pool.query(
+    `UPDATE user_management.profile_users
     SET ${fields.join(", ")}
     WHERE user_id = $${index} AND deleted_at IS NULL
-    RETURNING *
-  `;
+    RETURNING *`,
+    values,
+  );
 
-  values.push(userId);
-  const result = await pool.query(query, values);
   return result.rows[0];
 };
 

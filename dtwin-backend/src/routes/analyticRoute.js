@@ -2,6 +2,7 @@ import express from "express";
 import {
   faceDetectionAnalytic,
   dailyLogAnalytic,
+  updateDailyLogAnalytic,
 } from "../controllers/analyticController.js";
 import { scanFaceValidation } from "../validations/analyticValidation.js";
 import { authenticate } from "../middlewares/authMiddleware.js";
@@ -16,4 +17,5 @@ router.post(
   faceDetectionAnalytic,
 );
 router.post("/predict", authenticate, dailyLogAnalytic);
+router.put("/predict/:id", authenticate, updateDailyLogAnalytic);
 export default router;
