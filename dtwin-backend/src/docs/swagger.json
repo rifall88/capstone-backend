@@ -517,26 +517,12 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "log_date": {
-                    "type": "string",
-                    "format": "date",
-                    "example": "2026-05-31",
-                    "description": "Optional. Defaults to current date if not provided."
-                  },
-                  "sleep_duration": { "type": "number", "example": 7.5 },
-                  "sleep_quality": { "type": "number", "example": 8 },
-                  "study_work_duration": { "type": "number", "example": 6.0 },
-                  "break_duration": { "type": "number", "example": 1.5 },
-                  "physical_activity_duration": {
-                    "type": "number",
-                    "example": 1.0
-                  },
-                  "screen_time_duration": { "type": "number", "example": 4.5 },
-                  "stress_level": { "type": "number", "example": 4 },
-                  "mood_score": { "type": "number", "example": 7 },
-                  "focus_score": { "type": "number", "example": 8 },
-                  "task_completed": { "type": "number", "example": 4 },
-                  "task_planned": { "type": "number", "example": 5 }
+                  "sleep_duration": { "type": "number" },
+                  "study_work_duration": { "type": "number" },
+                  "exercise_duration": { "type": "number" },
+                  "downtime_duration": { "type": "number" },
+                  "task_planned": { "type": "integer" },
+                  "task_completed": { "type": "integer" }
                 }
               }
             }
@@ -545,12 +531,6 @@
         "responses": {
           "200": {
             "description": "Productivity analysis generated successfully."
-          },
-          "400": {
-            "description": "Bad Request. Returned if user goals are not set or if there are less than 7 days of logs."
-          },
-          "500": {
-            "description": "Internal server error or AI Microservice timeout/failure."
           }
         }
       }

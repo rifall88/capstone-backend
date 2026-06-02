@@ -1,6 +1,9 @@
 import express from "express";
-import { scanAndRecordFace } from "../controllers/faceDetectionController.js";
-import { scanFaceValidation } from "../validations/faceDetectionValidation.js";
+import {
+  faceDetectionAnalytic,
+  dailyLogAnalytic,
+} from "../controllers/analyticController.js";
+import { scanFaceValidation } from "../validations/analyticValidation.js";
 import { authenticate } from "../middlewares/authMiddleware.js";
 import { validateRequest } from "../middlewares/validationMiddleware.js";
 
@@ -10,6 +13,7 @@ router.post(
   "/face-detection",
   authenticate,
   validateRequest(scanFaceValidation),
-  scanAndRecordFace,
+  faceDetectionAnalytic,
 );
+router.post("/predict", authenticate, dailyLogAnalytic);
 export default router;

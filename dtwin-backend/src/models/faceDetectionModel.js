@@ -1,6 +1,6 @@
 import pool from "../databases/dbConfig.js";
 
-export const createFaceAnalyticsLog = async (data) => {
+export const createFaceDetection = async (data) => {
   const {
     id,
     user_id,
@@ -27,6 +27,22 @@ export const createFaceAnalyticsLog = async (data) => {
       is_known_face,
       source,
     ],
+  );
+
+  return result.rows[0];
+};
+
+export const getLastFaceScanByDate = async (data) => {
+  const { userId, startDate, endDate } = data;
+
+  const result = await pool.query(
+    `SELECT emotion FROM analytics.face_detections 
+    WHERE user_id = $1 
+      AND captured_at >= $2 
+      AND captured_at <= $3 
+    ORDER BY captured_at DESC 
+    LIMIT 1`,
+    [userId, startDate, endDate],
   );
 
   return result.rows[0];
