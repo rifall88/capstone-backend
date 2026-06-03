@@ -29,8 +29,8 @@ router.post(
 router.put(
   "/predict/:id",
   authenticate,
-  validateRequest(dailyLogParamsValidation),
-  validateRequest(dailyLogBodyValidation),
+  validateRequest(dailyLogParamsValidation, "params"),
+  validateRequest(dailyLogBodyValidation, "body"),
   updateDailyLogAnalytic,
 );
 export default router;

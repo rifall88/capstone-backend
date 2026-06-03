@@ -60,8 +60,8 @@ export const dailyLogBodyValidation = Joi.object({
 
 export const dailyLogParamsValidation = Joi.object({
   id: Joi.string().guid({ version: "uuidv4" }).required().messages({
-    "string.empty": "Log ID parameter cannot be empty",
-    "string.guid": "Log ID must be a valid UUID v4 format",
-    "any.required": "Log ID parameter is required",
+    "string.empty": "ID parameter cannot be empty",
+    "string.guid": "ID must be a valid UUID v4 format",
+    "any.required": "ID parameter is required",
   }),
 });

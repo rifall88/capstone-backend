@@ -22,6 +22,7 @@ app.use(
       "http://localhost:5173",
       "http://localhost:85",
       "http://192.168.20.31:85",
+      "https://smart-dtwin.projectbase.my.id",
     ],
     credentials: true,
   }),

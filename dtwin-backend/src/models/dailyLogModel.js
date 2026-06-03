@@ -133,10 +133,9 @@ export const updateDailyLog = async (data) => {
   return result.rows[0];
 };
 
-// 2. Mengambil 7 Log Terakhir untuk Input AI
 export const getLast7DailyLogs = async (userId) => {
   const result = await pool.query(
-    `SELECT * FROM telemetry.daily_logs 
+    `SELECT * FROM analytics.daily_logs 
      WHERE user_id = $1
      ORDER BY log_date ASC 
      LIMIT 7`,
@@ -145,7 +144,6 @@ export const getLast7DailyLogs = async (userId) => {
   return result.rows;
 };
 
-// 3. Menyimpan Log Harian (Dengan Penambal Otomatis COALESCE)
 export const upsertDailyLog = async (data) => {
   const {
     user_id,

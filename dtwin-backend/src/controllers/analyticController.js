@@ -7,8 +7,10 @@ import {
   getPreviousDailyLog,
   updateDailyLog,
   findDailyLog,
+  getLast7DailyLogs,
 } from "../models/dailyLogModel.js";
 import { checkIsWeekendOrHoliday } from "../utils/holidayWeekend.js";
+import { formatDateForFE } from "../utils/dateFormatter.js";
 import {
   getMoodScoreFromEmotion,
   calculateStressLevel,
@@ -187,30 +189,82 @@ export const dailyLogAnalytic = async (req, res) => {
       productivity_score: finalProductivityScore,
     });
 
-    // const pythonResponse = await axios.post(
-    //   process.env.FACE_DETECTION,
-    //   { image_base64 },
-    //   {
-    //     headers: { Authorization: `Bearer ${process.env.SECRET_TOKEN_AI}` },
-    //     timeout: 80000,
-    //   },
-    // );
+    const dailySummary = {
+      sleep_duration,
+      study_work_duration,
+      exercise_duration,
+      downtime_duration,
+      task_planned,
+      task_completed,
+      last_updated: formatDateForFE(dailyLogs.created_at),
+    };
+
+    const last7Logs = await getLast7DailyLogs(userId);
+    if (last7Logs.length < 7) {
+      const daysShort = 7 - last7Logs.length;
+      return res.status(200).json({
+        status: "success",
+        message: `Daily log saved successfully! AI prediction needs ${daysShort} more day(s) of data.`,
+        data: {
+          ai_status: "waiting_for_data",
+          current_logs_count: last7Logs.length,
+        },
+      });
+    }
+
+    const formattedLast7Logs = last7Logs.map((log) => ({
+      id: log.id,
+      user_id: log.user_id,
+      log_date: log.log_date,
+      is_weekend: log.is_weekend,
+      sleep_duration: log.sleep_duration,
+      study_work_duration: log.study_work_duration,
+      break_duration: log.break_duration,
+      exercise_duration: log.exercise_duration,
+      downtime_duration: log.downtime_duration,
+      stress_level: log.stress_level,
+      mood_score: log.mood_score,
+      focus_score: log.focus_score,
+      task_planned: log.task_planned,
+      task_completed: log.task_completed,
+      completion_ratio: log.completion_ratio,
+      fatigue_index: calculateFatigueIndex({
+        stress_level: log.stress_level,
+        downtime_duration: log.downtime_duration,
+        study_work_duration: log.study_work_duration,
+      }),
+      cumulative_fatigue: log.fatigue_accumulation,
+    }));
+
+    const pythonResponse = await axios.post(
+      process.env.AI_PREDICTION_URL,
+      {
+        last_7_logs: formattedLast7Logs,
+      },
+      {
+        headers: { Authorization: `Bearer ${process.env.SECRET_TOKEN_AI}` },
+        timeout: 80000,
+      },
+    );
+
+    const aiResult = pythonResponse.data;
 
     return res.status(200).json({
       status: "success",
-      message: `Input productivity successful.`,
-      data: dailyLogs,
+      message: `Analytics productivity successful.`,
+      data: aiResult,
+      dailySummary,
     });
   } catch (error) {
     console.error("Productivity Error:", error.message);
 
-    // if (error.response) {
-    //   return res.status(error.response.status).json({
-    //     status: "failed",
-    //     message: "The AI microservice rejects the request",
-    //     error: error.response.data.detail,
-    //   });
-    // }
+    if (error.response) {
+      return res.status(error.response.status).json({
+        status: "failed",
+        message: "The AI microservice rejects the request",
+        error: error.response.data.detail,
+      });
+    }
 
     return res.status(500).json({
       status: "failed",
@@ -309,7 +363,7 @@ export const updateDailyLogAnalytic = async (req, res) => {
     );
 
     const updatedDailyLog = await updateDailyLog({
-      id: logId,
+      id: id,
       user_id: userId,
       sleep_duration,
       study_work_duration,
@@ -326,112 +380,84 @@ export const updateDailyLogAnalytic = async (req, res) => {
       productivity_score: finalProductivityScore,
     });
 
+    const dailySummary = {
+      sleep_duration,
+      study_work_duration,
+      exercise_duration,
+      downtime_duration,
+      task_planned,
+      task_completed,
+      last_updated: formatDateForFE(updatedDailyLog.updated_at),
+    };
+
+    const last7Logs = await getLast7DailyLogs(userId);
+    if (last7Logs.length < 7) {
+      const daysShort = 7 - last7Logs.length;
+      return res.status(200).json({
+        status: "success",
+        message: `Daily log saved successfully! AI prediction needs ${daysShort} more day(s) of data.`,
+        data: {
+          ai_status: "waiting_for_data",
+          current_logs_count: last7Logs.length,
+        },
+      });
+    }
+
+    const formattedLast7Logs = last7Logs.map((log) => ({
+      id: log.id,
+      user_id: log.user_id,
+      log_date: log.log_date,
+      is_weekend: log.is_weekend,
+      sleep_duration: log.sleep_duration,
+      study_work_duration: log.study_work_duration,
+      break_duration: log.break_duration,
+      exercise_duration: log.exercise_duration,
+      downtime_duration: log.downtime_duration,
+      stress_level: log.stress_level,
+      mood_score: log.mood_score,
+      focus_score: log.focus_score,
+      task_planned: log.task_planned,
+      task_completed: log.task_completed,
+      completion_ratio: log.completion_ratio,
+      fatigue_index: calculateFatigueIndex({
+        stress_level: log.stress_level,
+        downtime_duration: log.downtime_duration,
+        study_work_duration: log.study_work_duration,
+      }),
+      cumulative_fatigue: log.fatigue_accumulation,
+    }));
+
+    const pythonResponse = await axios.post(
+      process.env.AI_PREDICTION_URL,
+      {
+        last_7_logs: formattedLast7Logs,
+      },
+      {
+        headers: { Authorization: `Bearer ${process.env.SECRET_TOKEN_AI}` },
+        timeout: 80000,
+      },
+    );
+
+    const aiResult = pythonResponse.data;
+
     return res.status(200).json({
       status: "success",
       message: "Daily log successfully updated.",
-      data: updatedDailyLog,
+      data: aiResult,
+      dailySummary,
     });
   } catch (error) {
     console.error("Update Productivity Error:", error.message);
+    if (error.response) {
+      return res.status(error.response.status).json({
+        status: "failed",
+        message: "The AI microservice rejects the request",
+        error: error.response.data.detail,
+      });
+    }
     return res.status(500).json({
       status: "failed",
       message: "Internal server error",
     });
   }
 };
-
-// export const analyzeDailyActivity = async (req, res) => {
-//   try {
-//     const userId = req.user.id;
-//     const inputData = req.body;
-//     console.log(process.env.SECRET_TOKEN_AI);
-//     const logDate =
-//       inputData.log_date || new Date().toISOString().split("T")[0];
-//     const dayOfWeek = new Date(logDate).getDay();
-//     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-
-//     const userGoals = await getUserGoals(userId);
-//     if (!userGoals) {
-//       return res
-//         .status(400)
-//         .json({ status: "failed", message: "User goals not set" });
-//     }
-
-//     const processedLog = {
-//       user_id: userId,
-//       log_date: logDate,
-//       is_weekend: isWeekend,
-//       sleep_duration: inputData.sleep_duration ?? null,
-//       sleep_quality: inputData.sleep_quality ?? null,
-//       study_work_duration: inputData.study_work_duration ?? null,
-//       break_duration: inputData.break_duration ?? null,
-//       physical_activity_duration: inputData.physical_activity_duration ?? null,
-//       screen_time_duration: inputData.screen_time_duration ?? null,
-//       stress_level: inputData.stress_level ?? null,
-//       mood_score: inputData.mood_score ?? null,
-//       focus_score: inputData.focus_score ?? null,
-//       task_completed: inputData.task_completed ?? null,
-//       task_planned: inputData.task_planned ?? null,
-//     };
-
-//     await upsertDailyLog(processedLog);
-
-//     const last7Logs = await getLast7DailyLogs(userId);
-//     if (last7Logs.length < 7) {
-//       const daysShort = 7 - last7Logs.length;
-//       return res.status(200).json({
-//         status: "success",
-//         message: `Daily log saved successfully! AI prediction needs ${daysShort} more day(s) of data.`,
-//         data: {
-//           ai_status: "waiting_for_data",
-//           current_logs_count: last7Logs.length,
-//         },
-//       });
-//     }
-
-//     const formattedLogs = last7Logs.map((log) => {
-//       const planned = log.task_planned || 0;
-//       const completed = log.task_completed || 0;
-//       const ratio = planned > 0 ? completed / planned : 0;
-
-//       return {
-//         ...log,
-//         completion_ratio: ratio,
-//         task_completion_rate: ratio,
-//       };
-//     });
-
-//     const pythonResponse = await axios.post(
-//       process.env.AI_PREDICTION_URL,
-//       {
-//         user_id: userId,
-//         user_goals: userGoals,
-//         last_7_logs: formattedLogs,
-//       },
-//       {
-//         headers: { Authorization: `Bearer ${process.env.SECRET_TOKEN_AI}` },
-//         timeout: 80000,
-//       },
-//     );
-
-//     const aiResult = pythonResponse.data.data;
-
-//     return res.status(200).json({
-//       status: "success",
-//       message: "Productivity analysis generated successfully",
-//       data: aiResult,
-//     });
-//   } catch (error) {
-//     console.error("Express Prediction Error:", error.message);
-//     if (error.response) {
-//       return res.status(error.response.status).json({
-//         status: "failed",
-//         message: "AI Microservice error",
-//         error: error.response.data.detail,
-//       });
-//     }
-//     return res
-//       .status(500)
-//       .json({ status: "failed", message: "Internal server error" });
-//   }
-// };

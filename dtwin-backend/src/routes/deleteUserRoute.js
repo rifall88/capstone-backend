@@ -25,7 +25,7 @@ router.delete(
   "/:id",
   authenticate,
   isAdmin,
-  validateRequest(softDeleteValidation),
+  validateRequest(softDeleteValidation, "params"),
   softDelete,
 );
 
