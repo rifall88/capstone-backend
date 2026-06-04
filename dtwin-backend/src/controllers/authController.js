@@ -11,6 +11,7 @@ import {
 } from "../models/userModel.js";
 import { createLoginLog } from "../models/loginLogModel.js";
 import { createProfile } from "../models/profileModel.js";
+import { getLastFaceScanByDate } from "../models/faceDetectionModel.js";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import geoip from "geoip-lite";
@@ -147,6 +148,18 @@ export const login = async (req, res) => {
       location,
     });
 
+    const today = new Date();
+    const startOfToday = new Date(today.setHours(0, 0, 0, 0));
+    const endOfToday = new Date(today.setHours(23, 59, 59, 999));
+
+    const lastFaceScan = await getLastFaceScanByDate({
+      userId: user.id,
+      startDate: startOfToday,
+      endDate: endOfToday,
+    });
+
+    const isCheckin = !!lastFaceScan;
+
     res.status(200).json({
       status: "success",
       message: "Login successful",
@@ -155,6 +168,7 @@ export const login = async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
+        isCheckin,
         accessToken,
         refreshToken,
       },

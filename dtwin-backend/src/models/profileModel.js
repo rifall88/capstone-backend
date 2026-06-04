@@ -48,7 +48,7 @@ export const updateProfile = async (data, userId) => {
 
 export const findUserAllProfile = async () => {
   const result = await pool.query(
-    `SELECT p.full_name, u.email, u.role, u.is_active, u.created_at 
+    `SELECT u.id, p.full_name, u.email, u.role, u.is_active, u.created_at 
     FROM user_management.profile_users p 
     INNER JOIN authentication.users u ON p.user_id = u.id
     ORDER BY u.created_at DESC`,

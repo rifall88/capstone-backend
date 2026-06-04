@@ -29,6 +29,34 @@ export const faceDetectionAnalytic = async (req, res) => {
     const { image_base64 } = req.body;
     const userId = req.user.id;
 
+    const imageSizeInBytes = Buffer.byteLength(image_base64, "base64");
+    const imageSizeInMB = imageSizeInBytes / (1024 * 1024);
+
+    if (imageSizeInMB > 5) {
+      return res.status(400).json({
+        status: "failed",
+        message: `Image is too large (${imageSizeInMB.toFixed(3)} MB). Maximum allowed size is 5 MB.`,
+      });
+    }
+
+    const today = new Date();
+    const startOfToday = new Date(today.setHours(0, 0, 0, 0));
+    const endOfToday = new Date(today.setHours(23, 59, 59, 999));
+
+    const lastFaceScan = await getLastFaceScanByDate({
+      userId: userId,
+      startDate: startOfToday,
+      endDate: endOfToday,
+    });
+
+    if (lastFaceScan) {
+      return res.status(403).json({
+        status: "failed",
+        message:
+          "You have already completed your daily face check-in today. Come back tomorrow",
+      });
+    }
+
     const pythonResponse = await axios.post(
       process.env.FACE_DETECTION,
       { image_base64 },
@@ -176,7 +204,7 @@ export const dailyLogAnalytic = async (req, res) => {
       is_weekend: isRestDay,
       sleep_duration,
       study_work_duration,
-      break_duration: breakDuration,
+      break_duration: breakDuration.toFixed(3),
       exercise_duration,
       downtime_duration,
       stress_level: finalStressLevel,
@@ -367,7 +395,7 @@ export const updateDailyLogAnalytic = async (req, res) => {
       user_id: userId,
       sleep_duration,
       study_work_duration,
-      break_duration: breakDuration,
+      break_duration: breakDuration.toFixed(3),
       exercise_duration,
       downtime_duration,
       stress_level: finalStressLevel,
