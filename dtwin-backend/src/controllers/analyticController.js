@@ -222,6 +222,8 @@ export const dailyLogAnalytic = async (req, res) => {
       study_work_duration,
       exercise_duration,
       downtime_duration,
+      stress_level: finalStressLevel,
+      focus_score: finalFocusScore,
       task_planned,
       task_completed,
       last_updated: formatDateForFE(dailyLogs.created_at),
@@ -232,10 +234,11 @@ export const dailyLogAnalytic = async (req, res) => {
       const daysShort = 7 - last7Logs.length;
       return res.status(200).json({
         status: "success",
-        message: `Daily log saved successfully! AI prediction needs ${daysShort} more day(s) of data.`,
+        message: `Daily log saved successfully! AI prediction needs ${daysShort} more days of data.`,
         data: {
           ai_status: "waiting_for_data",
           current_logs_count: last7Logs.length,
+          dailySummary,
         },
       });
     }
@@ -279,7 +282,7 @@ export const dailyLogAnalytic = async (req, res) => {
 
     return res.status(200).json({
       status: "success",
-      message: `Analytics productivity successful.`,
+      message: `Daily log saved successfully`,
       data: aiResult,
       dailySummary,
     });
@@ -403,7 +406,7 @@ export const updateDailyLogAnalytic = async (req, res) => {
       focus_score: finalFocusScore,
       task_completed,
       task_planned,
-      completion_ratio: completionRatio,
+      completion_ratio: completionRatio.toFixed(3),
       fatigue_accumulation: finalFatigueAccumulation,
       productivity_score: finalProductivityScore,
     });
@@ -413,6 +416,8 @@ export const updateDailyLogAnalytic = async (req, res) => {
       study_work_duration,
       exercise_duration,
       downtime_duration,
+      stress_level: finalStressLevel,
+      focus_score: finalFocusScore,
       task_planned,
       task_completed,
       last_updated: formatDateForFE(updatedDailyLog.updated_at),
@@ -423,7 +428,7 @@ export const updateDailyLogAnalytic = async (req, res) => {
       const daysShort = 7 - last7Logs.length;
       return res.status(200).json({
         status: "success",
-        message: `Daily log saved successfully! AI prediction needs ${daysShort} more day(s) of data.`,
+        message: `Daily log successfully updated! AI prediction needs ${daysShort} more days of data.`,
         data: {
           ai_status: "waiting_for_data",
           current_logs_count: last7Logs.length,
