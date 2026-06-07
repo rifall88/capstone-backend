@@ -27,9 +27,9 @@ export const getAllLoginLogs = async () => {
     `SELECT id, identifier, ip_address, user_agent,
      status, failure_reason, location, created_at
      FROM authentication.login_logs
-     ORDER BY created_at ASC
+     ORDER BY created_at DESC
      LIMIT $1`,
-    [500],
+    [100],
   );
 
   return result.rows;

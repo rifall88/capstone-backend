@@ -52,6 +52,7 @@ model User {
   login_logs         LoginLog[]
   analytics_logs     FaceAnalyticsLog[]
   daily_logs         DailyLog[]
+  prediction_logs    PredictionLog[]
 
   @@map("users")
   @@schema("authentication")
@@ -120,7 +121,7 @@ model LoginLog {
 
 model ProfileUser {
   id            String    @id @default(uuid()) @db.Uuid
-  user_id       String    @unique @db.Uuid 
+  user_id       String    @unique @db.Uuid
   full_name     String?   @db.VarChar(255)
   phone         String?   @db.VarChar(20)
   birth_date    DateTime? @db.Date
@@ -179,3 +180,32 @@ model DailyLog {
   @@schema("analytics")
 }
 
+model PredictionLog {
+  id                       String   @id @default(uuid()) @db.Uuid
+  user_id                  String   @db.Uuid
+  prediction_date          DateTime @default(now()) @db.Timestamp(0)
+  days_analyzed            Int      @default(7)
+  productivity_status      String   @db.VarChar(100)
+  productivity_score       Float
+  prediction_confidence    Float
+  probabilities            Json
+  fatigue_level            Float
+  completion_rate          Float
+  risk_signal              String   @db.VarChar(100)
+  weekly_trend             String   @db.VarChar(100)
+  dominant_activity        String   @db.VarChar(100)
+  peak_productive_hours    String   @db.VarChar(100)
+  daily_chart_data         Json
+  activity_heatmap         Json
+  condition_insight        String   @db.Text
+  performance_cause        String   @db.Text
+  activity_recommendation  String   @db.Text
+  tomorrow_prediction      String   @db.Text
+  burnout_warning          String   @db.Text
+  top_similar_days         Json
+  avg_similar_productivity Float
+  user                     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("prediction_logs")
+  @@schema("analytics")
+}

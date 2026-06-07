@@ -1,8 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import swaggerUi from "swagger-ui-express";
-import swaggerDocument from "./docs/swagger.json" with { type: "json" };
+// import swaggerUi from "swagger-ui-express";
+// import swaggerDocument from "./docs/swagger.json" with { type: "json" };
 import userRoute from "./routes/userRoute.js";
 import authRoute from "./routes/authRoute.js";
 import profileRoute from "./routes/profileRoute.js";
@@ -44,7 +44,7 @@ app.use("/delete-user", deleteUserRoute);
 app.use("/login-log", loginLogRoute);
 app.use("/uploads", express.static("uploads"));
 
-app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+// app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get("/", (_req, res) => {
   res.send("Welcome to the Digital Twin API!");

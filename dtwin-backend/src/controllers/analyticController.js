@@ -8,6 +8,9 @@ import {
   updateDailyLog,
   findDailyLog,
   getLast7DailyLogs,
+  getLatestDailyLog,
+  getHeatmapLogs,
+  getDailyLog,
 } from "../models/dailyLogModel.js";
 import { checkIsWeekendOrHoliday } from "../utils/holidayWeekend.js";
 import { formatDateForFE } from "../utils/dateFormatter.js";
@@ -19,6 +22,10 @@ import {
   calculateFatigueIndex,
   calculateCumulativeFatigue,
 } from "../utils/dailyLogHelper.js";
+import {
+  createPredictionLog,
+  getLatestPredictionLog,
+} from "../models/predictionLog.js";
 import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
 import axios from "axios";
@@ -235,11 +242,6 @@ export const dailyLogAnalytic = async (req, res) => {
       return res.status(200).json({
         status: "success",
         message: `Daily log saved successfully! AI prediction needs ${daysShort} more days of data.`,
-        data: {
-          ai_status: "waiting_for_data",
-          current_logs_count: last7Logs.length,
-          dailySummary,
-        },
       });
     }
 
@@ -280,11 +282,14 @@ export const dailyLogAnalytic = async (req, res) => {
 
     const aiResult = pythonResponse.data;
 
+    const savedPrediction = await createPredictionLog({
+      id: uuidv4(),
+      ...aiResult,
+    });
+
     return res.status(200).json({
       status: "success",
       message: `Daily log saved successfully`,
-      data: aiResult,
-      dailySummary,
     });
   } catch (error) {
     console.error("Productivity Error:", error.message);
@@ -429,10 +434,6 @@ export const updateDailyLogAnalytic = async (req, res) => {
       return res.status(200).json({
         status: "success",
         message: `Daily log successfully updated! AI prediction needs ${daysShort} more days of data.`,
-        data: {
-          ai_status: "waiting_for_data",
-          current_logs_count: last7Logs.length,
-        },
       });
     }
 
@@ -473,11 +474,14 @@ export const updateDailyLogAnalytic = async (req, res) => {
 
     const aiResult = pythonResponse.data;
 
+    const savedPrediction = await createPredictionLog({
+      id: uuidv4(),
+      ...aiResult,
+    });
+
     return res.status(200).json({
       status: "success",
       message: "Daily log successfully updated.",
-      data: aiResult,
-      dailySummary,
     });
   } catch (error) {
     console.error("Update Productivity Error:", error.message);
@@ -489,6 +493,152 @@ export const updateDailyLogAnalytic = async (req, res) => {
       });
     }
     return res.status(500).json({
+      status: "failed",
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getLatestPrediction = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const latestPrediction = await getLatestPredictionLog(userId);
+
+    if (!latestPrediction) {
+      return res.status(200).json({
+        status: "success",
+        data: null,
+      });
+    }
+
+    const rawHeatmap = latestPrediction.activity_heatmap || {};
+    const normalizedRaw = {};
+    Object.keys(rawHeatmap).forEach((key) => {
+      normalizedRaw[key.toLowerCase()] = rawHeatmap[key];
+    });
+    const processedHeatmap = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      const dayName = d
+        .toLocaleDateString("en-US", { weekday: "long" })
+        .toLowerCase();
+      const dayShort = dayName.substring(0, 3).toUpperCase();
+      const aiValue = normalizedRaw[dayName];
+
+      return {
+        day: dayShort,
+        value: aiValue !== undefined ? Math.round(aiValue) : 0,
+      };
+    });
+
+    const formattedData = {
+      "1_main_dashboard": {
+        productivity_status: latestPrediction.productivity_status,
+        productivity_score: latestPrediction.productivity_score,
+        prediction_confidence: latestPrediction.prediction_confidence,
+        probabilities: latestPrediction.probabilities,
+        fatigue_level: latestPrediction.fatigue_level,
+        completion_rate: latestPrediction.completion_rate,
+        risk_signal: latestPrediction.risk_signal,
+      },
+      "2_productivity_analytics_dashboard": {
+        weekly_productivity_trend: latestPrediction.weekly_trend,
+        most_dominant_activity: latestPrediction.dominant_activity,
+        peak_productive_hours: latestPrediction.peak_productive_hours,
+        daily_productivity_chart: latestPrediction.daily_chart_data,
+        activity_heatmap: processedHeatmap,
+      },
+      "3_ai_insight_and_recommendation": {
+        condition_insight: latestPrediction.condition_insight,
+        performance_cause: latestPrediction.performance_cause,
+        activity_recommendation: latestPrediction.activity_recommendation,
+        tomorrow_prediction: latestPrediction.tomorrow_prediction,
+        burnout_warning: latestPrediction.burnout_warning,
+      },
+      "4_similar_productivity_history": {
+        top_3_similar_days: latestPrediction.top_similar_days,
+        average_productivity_from_similar_days:
+          latestPrediction.avg_similar_productivity,
+      },
+    };
+
+    return res.status(200).json({
+      status: "success",
+      message: "Latest AI prediction retrieved successfully",
+      data: formattedData,
+    });
+  } catch (error) {
+    console.error("Fetch Latest Prediction Error:", error.message);
+    return res.status(500).json({
+      status: "failed",
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getDailySummary = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const latestLog = await getLatestDailyLog(userId);
+
+    if (!latestLog) {
+      return res.status(200).json({
+        status: "success",
+        message: "No daily log found",
+        data: {
+          dailySummary: {
+            sleep_duration: 0,
+            study_work_duration: 0,
+            downtime_duration: 0,
+            exercise_duration: 0,
+            stress_level: 0,
+            last_updated: "Belum ada aktivitas",
+          },
+        },
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Daily summary retrieved successfully",
+      data: {
+        dailySummary: {
+          sleep_duration: latestLog.sleep_duration,
+          study_work_duration: latestLog.study_work_duration,
+          downtime_duration: latestLog.downtime_duration,
+          exercise_duration: latestLog.exercise_duration,
+          stress_level: latestLog.stress_level,
+          last_updated: formatDateForFE(latestLog.created_at),
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Get Daily Summary Error:", error.message);
+    return res.status(500).json({
+      status: "failed",
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getDailyLogs = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const dailyLogs = await getDailyLog(userId);
+    if (!dailyLogs) {
+      return res.status(404).json({
+        status: "failed",
+        message: "No daily log found",
+      });
+    }
+    res.status(200).json({
+      status: "success",
+      dailyLogs: dailyLogs || [],
+    });
+  } catch (error) {
+    console.error("Getting daily log error: ", error.message);
+    res.status(500).json({
       status: "failed",
       message: "Internal server error",
     });

@@ -588,6 +588,36 @@
           }
         }
       }
+    },
+    "/analytics/latest-prediction": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Get AI prediction",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Ok." }
+        }
+      }
+    },
+    "/analytics/daily-summary": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Get daily summary",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Ok." }
+        }
+      }
+    },
+    "/analytics/daily-logs": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Get all daily logs",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Ok." }
+        }
+      }
     }
   },
   "components": {

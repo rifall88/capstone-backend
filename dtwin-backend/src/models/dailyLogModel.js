@@ -23,6 +23,31 @@ export const findDailyLog = async (id, userId) => {
   return result.rows[0];
 };
 
+export const getLatestDailyLog = async (userId) => {
+  const result = await pool.query(
+    `SELECT * FROM analytics.daily_logs 
+     WHERE user_id = $1 
+     ORDER BY created_at DESC 
+     LIMIT 1`,
+    [userId],
+  );
+  return result.rows[0];
+};
+
+export const getDailyLog = async (userId) => {
+  const result = await pool.query(
+    `SELECT id, user_id, log_date, sleep_duration, study_work_duration,
+    downtime_duration, exercise_duration, mood_score, focus_score, stress_level,
+    task_planned, task_completed 
+    FROM analytics.daily_logs 
+    WHERE user_id = $1 
+    ORDER BY log_date DESC`,
+    [userId],
+  );
+
+  return result.rows;
+};
+
 export const createDailyLog = async (data) => {
   const {
     id,
@@ -135,9 +160,25 @@ export const updateDailyLog = async (data) => {
 
 export const getLast7DailyLogs = async (userId) => {
   const result = await pool.query(
-    `SELECT * FROM analytics.daily_logs 
-     WHERE user_id = $1
-     ORDER BY log_date ASC 
+    `SELECT * FROM (
+       SELECT * FROM analytics.daily_logs 
+       WHERE user_id = $1
+       ORDER BY log_date DESC 
+       LIMIT 7
+     ) AS last_seven_logs
+     ORDER BY log_date ASC`,
+    [userId],
+  );
+  return result.rows;
+};
+
+export const getHeatmapLogs = async (userId) => {
+  const result = await pool.query(
+    `SELECT productivity_score, 
+            TO_CHAR(log_date, 'DY') as day_name 
+     FROM analytics.daily_logs 
+     WHERE user_id = $1 AND productivity_score > 0
+     ORDER BY log_date DESC 
      LIMIT 7`,
     [userId],
   );

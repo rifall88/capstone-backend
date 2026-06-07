@@ -3,6 +3,9 @@ import {
   faceDetectionAnalytic,
   dailyLogAnalytic,
   updateDailyLogAnalytic,
+  getLatestPrediction,
+  getDailySummary,
+  getDailyLogs,
 } from "../controllers/analyticController.js";
 import {
   scanFaceValidation,
@@ -33,4 +36,7 @@ router.put(
   validateRequest(dailyLogBodyValidation, "body"),
   updateDailyLogAnalytic,
 );
+router.get("/latest-prediction", authenticate, getLatestPrediction);
+router.get("/daily-summary", authenticate, getDailySummary);
+router.get("/daily-logs", authenticate, getDailyLogs);
 export default router;
